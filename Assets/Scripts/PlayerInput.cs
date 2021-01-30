@@ -14,6 +14,7 @@ public class PlayerInput : MonoBehaviour
     public bool invertXAxis = false;
 
     bool m_FireInputWasHeld;
+    bool m_Fire2InputWasHeld;
 
     private void Start()
     {
@@ -24,6 +25,7 @@ public class PlayerInput : MonoBehaviour
     private void LateUpdate()
     {
         m_FireInputWasHeld = GetFireInputHeld();
+        m_Fire2InputWasHeld = GetFire2InputHeld();
     }
 
     public bool IsInputDisabled()
@@ -92,6 +94,29 @@ public class PlayerInput : MonoBehaviour
             return Input.GetAxis(AppConstants.k_ButtonNameGamepadFire) >= triggerAxisThreshold;
         } else {
             return Input.GetButton(AppConstants.k_ButtonNameFire);
+        }
+    }
+    public bool GetFire2InputDown()
+    {
+        return GetFire2InputHeld() && !m_Fire2InputWasHeld;
+    }
+
+    public bool GetFire2InputReleased()
+    {
+        return !GetFire2InputHeld() && m_Fire2InputWasHeld;
+    }
+
+    public bool GetFire2InputHeld()
+    {
+        if (IsInputDisabled()) {
+            return false;
+        }
+
+        bool isGamepad = Input.GetAxis(AppConstants.k_ButtonNameGamepadFire2) != 0f;
+        if (isGamepad) {
+            return Input.GetAxis(AppConstants.k_ButtonNameGamepadFire2) >= triggerAxisThreshold;
+        } else {
+            return Input.GetButton(AppConstants.k_ButtonNameFire2);
         }
     }
 

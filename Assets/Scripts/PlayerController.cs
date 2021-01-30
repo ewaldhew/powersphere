@@ -39,6 +39,10 @@ public class PlayerController : MonoBehaviour
         Tooltip("Ground check physics layer mask")]
     LayerMask groundCheckLayerMask;
 
+    [SerializeField,
+        Tooltip("Pickup-able items layer mask")]
+    LayerMask pickupLayerMask;
+
     private Vector3 ColliderBottom
     {
         get
@@ -64,10 +68,16 @@ public class PlayerController : MonoBehaviour
     private const float MIN_JUMP_TIME = 0.5f; // NOTE: arbitrary, can be found by solving a quadratic though
     private const float JUMP_WINDOW = 0.2f; // seconds
 
+    private PlayerCommand pickup1;
+    private PlayerCommand pickup2;
+    private GameObject[] heldObjects = new GameObject[2];
+
     // Start is called before the first frame update
     void Start()
     {
         jump = new PlayerCommand(JUMP_WINDOW);
+        pickup1 = new PlayerCommand(1f);
+        pickup2 = new PlayerCommand(1f);
     }
 
     // Update is called once per frame
@@ -148,6 +158,56 @@ public class PlayerController : MonoBehaviour
                 baseController.Move(velocity * Time.deltaTime);
                 velocity = postVelocity;
             }
+
+            // pickup
+            {
+                pickup1.Update(playerInput.GetFireInputDown());
+                if (pickup1.Activate()) {
+                    Pickup(0);
+                }
+                pickup2.Update(playerInput.GetFire2InputDown());
+                if (pickup2.Activate()) {
+                    Pickup(1);
+                }
+            }
         }
+    }
+
+    private void Pickup(int slotIndex)
+    {
+        // drop currently held item, if any
+        if (heldObjects[slotIndex] != null) {
+            heldObjects[slotIndex].SendMessage("OnDrop");
+            heldObjects[slotIndex] = null;
+            return;
+        }
+
+        Collider[] items = Physics.OverlapSphere(transform.position, baseController.radius * 2f, pickupLayerMask);
+        if (items.Length <= 0) {
+            return;
+        }
+
+        GameObject target = null;
+        foreach (var item in items) {
+            bool isAlreadyHeld = System.Array.Exists(heldObjects, obj => obj == item.gameObject);
+            if (isAlreadyHeld) {
+                continue;
+            } else {
+                target = item.gameObject;
+                break;
+            }
+        }
+        if (!target) {
+            return;
+        }
+
+        var pickupMessage = new MessageTypes.Pickup {
+            picker = gameObject,
+            picked = null,
+            slotIndex = slotIndex,
+        };
+
+        target.SendMessage("OnPickup", pickupMessage);
+        heldObjects[slotIndex] = target;
     }
 }

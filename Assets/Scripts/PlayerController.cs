@@ -36,10 +36,6 @@ public class PlayerController : MonoBehaviour
     float rotationSpeed = 200f;
 
     [SerializeField,
-        Tooltip("Movement bounds")]
-    Rect movementBounds;
-
-    [SerializeField,
         Tooltip("Ground check physics layer mask")]
     LayerMask groundCheckLayerMask;
 
@@ -60,17 +56,18 @@ public class PlayerController : MonoBehaviour
 
     private Vector3 velocity;
 
-    private float jumpTime = 0;
-    private bool shouldJump = false;
+    private PlayerCommand jump;
     private bool isOnGround;
     private Vector3 groundNormal;
 
     private const float GROUND_CHECK_DISTANCE = 0.05f;
     private const float MIN_JUMP_TIME = 0.5f; // NOTE: arbitrary, can be found by solving a quadratic though
+    private const float JUMP_WINDOW = 0.2f; // seconds
 
     // Start is called before the first frame update
     void Start()
     {
+        jump = new PlayerCommand(JUMP_WINDOW);
     }
 
     // Update is called once per frame
@@ -83,7 +80,7 @@ public class PlayerController : MonoBehaviour
 
             float maxGroundingDistance = baseController.skinWidth + GROUND_CHECK_DISTANCE;
 
-            if (Time.time >= jumpTime + MIN_JUMP_TIME &&
+            if (Time.time >= jump.ActivatedTime + MIN_JUMP_TIME &&
                 Physics.CapsuleCast(ColliderBottom, ColliderTop, baseController.radius, Vector3.down, out RaycastHit hit, maxGroundingDistance, groundCheckLayerMask, QueryTriggerInteraction.Ignore)) {
                 // for use in projecting move direction
                 groundNormal = hit.normal;
@@ -129,14 +126,12 @@ public class PlayerController : MonoBehaviour
                 velocity = new Vector3(vx, isOnGround ? vy : velocity.y, vz);
 
                 // add jump
-                shouldJump |= isOnGround && playerInput.GetJumpInputDown();
-                if (isOnGround && shouldJump) {
+                jump.Update(playerInput.GetJumpInputDown());
+                if (isOnGround && jump.Activate()) {
                     velocity.y = jumpSpeed;
 
                     isOnGround = false;
                     groundNormal = Vector3.up;
-                    shouldJump = false;
-                    jumpTime = Time.time;
                 }
 
                 // apply gravity

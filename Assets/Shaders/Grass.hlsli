@@ -89,7 +89,7 @@ geomOut outputToVertexStream(geomOut base, float3 basePos, float3 offset, float3
 }
 
 [maxvertexcount(NUM_BLADES * (NUM_SEGMENTS * 2 + 1))]
-void geom(triangle vertOut IN[3], inout TriangleStream<geomOut> triStream)
+void geom(point vertOut IN[1], inout TriangleStream<geomOut> triStream)
 {
     float4 pos_WS = IN[0].pos_WS;
     float3 normal = IN[0].normal_WS;
@@ -111,8 +111,8 @@ void geom(triangle vertOut IN[3], inout TriangleStream<geomOut> triStream)
         sincos(r, sinr, cosr);
         float3 bladeBasePos = pos_WS.xyz + (tangent * -sinr + bitangent * cosr) * _Radius;
 
-        float3x3 facingMatrix = AngleAxis3x3(r, float3(0, -1, 0));
-        float3x3 transform = mul(facingMatrix, tangentToWorldMatrix);
+        float3x3 facingMatrix = AngleAxis3x3(rand(bladeBasePos.zxy) * TWO_PI, float3(0, 0, 1));
+        float3x3 transform = mul(tangentToWorldMatrix, facingMatrix);
 
         float bladeLean = _Lean;
         float bladeHeight = _Height + (rand(bladeBasePos) * 2.0f - 1.0f) * _HeightJitter;

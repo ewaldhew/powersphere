@@ -133,6 +133,7 @@ GameObject:
   - component: {fileID: 289287370}
   - component: {fileID: 289287369}
   - component: {fileID: 289287368}
+  - component: {fileID: 289287371}
   m_Layer: 0
   m_Name: GrassPlane
   m_TagString: Untagged
@@ -148,7 +149,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 289287366}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 6.92, y: 0.38, z: 16.93}
+  m_LocalPosition: {x: -4.77, y: 0.69, z: 5.48}
   m_LocalScale: {x: 5.324855, y: 5.9999995, z: 5.3749256}
   m_Children: []
   m_Father: {fileID: 1076026182}
@@ -214,7 +215,20 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 289287366}
-  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: 0}
+--- !u!114 &289287371
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 289287366}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 07522c421673594489f6e17c0de31eb1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  grassDensity: 8
 --- !u!1001 &308277454
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -876,7 +890,7 @@ PrefabInstance:
     - target: {fileID: 5997605386751013889, guid: da7677b7529283748ab36d849b3e8270,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 98.97
+      value: 85.13
       objectReference: {fileID: 0}
     - target: {fileID: 5997605386751013889, guid: da7677b7529283748ab36d849b3e8270,
         type: 3}
@@ -886,7 +900,7 @@ PrefabInstance:
     - target: {fileID: 5997605386751013889, guid: da7677b7529283748ab36d849b3e8270,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 9.25
+      value: 6.6
       objectReference: {fileID: 0}
     - target: {fileID: 5997605386751013889, guid: da7677b7529283748ab36d849b3e8270,
         type: 3}

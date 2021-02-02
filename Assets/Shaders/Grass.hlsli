@@ -42,6 +42,10 @@ float _Width;
 float _Lean;
 float4 _Color;
 
+float3 _PlayerPosition;
+float _GrassSquashRadius;
+float _GrassSquashStrength;
+
 struct appdata
 {
     float4 pos_OS : POSITION;
@@ -79,11 +83,11 @@ void vert(appdata IN, out vertOut OUT)
 geomOut outputToVertexStream(geomOut base, float3 basePos, float3 offset, float3 prevOffset, float3x3 transform)
 {
     geomOut OUT = base;
-    float4 pos = float4(basePos + mul(transform, offset), 1);
+    float4 pos = float4(basePos + mul(offset, transform), 1);
     float3 localNormal_TS = normalize(float3(0, -1, (offset.y - prevOffset.y) / (offset.z - prevOffset.z)));
     OUT.pos_WS = pos;
-    OUT.pos_CS = TransformWorldToHClip(pos);
-    OUT.normal_WS = mul(transform, localNormal_TS);
+    OUT.pos_CS = TransformWorldToHClip(pos.xyz);
+    OUT.normal_WS = mul(localNormal_TS, transform);
     OUT.uv = float2(0, offset.x);
     return OUT;
 }
@@ -105,20 +109,28 @@ void geom(point vertOut IN[1], inout TriangleStream<geomOut> triStream)
     geomOut OUT;
     OUT.center_WS = pos_WS;
 
+    [unroll]
     for (int blade = 0; blade < NUM_BLADES; blade++) {
         float r = blade / (float)NUM_BLADES * TWO_PI;
         float sinr, cosr;
         sincos(r, sinr, cosr);
         float3 bladeBasePos = pos_WS.xyz + (tangent * -sinr + bitangent * cosr) * _Radius;
 
+        float distanceFromSquasher = distance(_PlayerPosition.xz, bladeBasePos.xz);
+        float squashFactor = 1.0f - saturate(distanceFromSquasher / _GrassSquashRadius); // Can sample from texture also
+        float3 squashDirection = -cross(_PlayerPosition - bladeBasePos, normal); // Can sample derivative of texture
+        float3x3 squashingMatrix = AngleAxis3x3(_GrassSquashStrength * squashFactor, squashDirection);
+
         float3x3 facingMatrix = AngleAxis3x3(rand(bladeBasePos.zxy) * TWO_PI, float3(0, 0, 1));
-        float3x3 transform = mul(tangentToWorldMatrix, facingMatrix);
+
+        float3x3 transform = mul(facingMatrix, tangentToWorldMatrix);
 
         float bladeLean = _Lean;
         float bladeHeight = _Height + (rand(bladeBasePos) * 2.0f - 1.0f) * _HeightJitter;
         float bladeWidth = _Width;
 
         float3 prevOffset = float3(0, 0, -1);
+        [unroll]
         for (int segment = 0; segment < NUM_SEGMENTS; segment++) {
             float t = segment / (float)NUM_SEGMENTS;
             float3 offset = float3(
@@ -130,6 +142,10 @@ void geom(point vertOut IN[1], inout TriangleStream<geomOut> triStream)
             triStream.Append(outputToVertexStream(OUT, bladeBasePos, offset, prevOffset, transform));
             triStream.Append(outputToVertexStream(OUT, bladeBasePos, offset * float3(-1, 1, 1), prevOffset, transform));
             prevOffset = offset;
+
+            if (segment == 1) {
+                transform = mul(transform, squashingMatrix);
+            }
         }
         triStream.Append(outputToVertexStream(OUT, bladeBasePos, float3(0, bladeLean, bladeHeight), prevOffset, transform));
         triStream.RestartStrip();
@@ -138,12 +154,9 @@ void geom(point vertOut IN[1], inout TriangleStream<geomOut> triStream)
 
 float4 frag(geomOut IN, float facing : VFACE) : SV_Target
 {
-    InputData lightingInput;
-    lightingInput.positionWS = IN.pos_WS;
-
     float3 N = IN.normal_WS * sign(facing);
     float NdotL = saturate(dot(N, _MainLightPosition.xyz));
-    float4 col = float4(_Color + NdotL * _MainLightColor.rgb, 1);
+    float4 col = _Color + float4(NdotL * _MainLightColor.rgb, 1);
     return col;
 }
 

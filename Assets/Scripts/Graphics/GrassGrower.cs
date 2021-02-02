@@ -5,16 +5,18 @@ using UnityEngine;
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public class GrassGrower : MonoBehaviour
 {
-    [SerializeField, Range(1, 200),
+    const int MAX_CLUSTERS = 200;
+
+    [SerializeField, Range(1, MAX_CLUSTERS),
         Tooltip("Number of grass clusters to generate")]
     public int grassDensity = 100;
 
     private int prevGrassDensity = 0;
-    private Vector2[] halton = new Vector2[100];
+    private Vector2[] halton = new Vector2[MAX_CLUSTERS];
 
     private void Start()
     {
-        halton = GenerateHalton23(100);
+        halton = GenerateHalton23(MAX_CLUSTERS);
     }
 
     private void Update()
@@ -47,7 +49,7 @@ public class GrassGrower : MonoBehaviour
         mesh.uv = uvCoords;
         mesh.normals = normals;
         mesh.tangents = tangents;
-        mesh.RecalculateBounds();
+        mesh.RecalculateBounds(); // XXX: Does not account for grass height!
     }
 
     private Vector2[] GenerateHalton23(uint length)

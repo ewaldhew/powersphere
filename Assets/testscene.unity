@@ -334,6 +334,7 @@ GameObject:
   m_Component:
   - component: {fileID: 376207982}
   - component: {fileID: 376207981}
+  - component: {fileID: 376207984}
   m_Layer: 0
   m_Name: AppController
   m_TagString: Untagged
@@ -353,9 +354,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8d3b0cf19d317448a79fc08b1a273fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  objects:
-  - {fileID: 995052662}
-  isHeld: 
+  gameState: {fileID: 376207984}
 --- !u!4 &376207982
 Transform:
   m_ObjectHideFlags: 0
@@ -370,6 +369,23 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &376207984
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 376207980}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f83142fb5048784e9070a7beee22947, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 1026353363}
+  objects:
+  - {fileID: 995052662}
+  - {fileID: 0}
+  isHeld: 
 --- !u!4 &407285573 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2497406903890568550, guid: 7ba64c0944716c24f911914e2e6af7a4,

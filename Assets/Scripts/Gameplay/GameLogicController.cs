@@ -13,11 +13,8 @@ namespace GameEvents
 
 public class GameLogicController : MonoBehaviour
 {
-    // Game State
     [SerializeField]
-    GameObject[] objects;
-    [SerializeField]
-    bool[] isHeld;
+    GameState gameState;
 
     // Events
     [SerializeField]
@@ -25,16 +22,15 @@ public class GameLogicController : MonoBehaviour
 
     void PlayerPickup(MessageTypes.Pickup m)
     {
-        for (int i = 0; i < objects.Length; i++) {
-            if (objects[i] == m.picked) {
-                isHeld[i] = m.picker != null;
+        for (int i = 0; i < gameState.objects.Length; i++) {
+            if (gameState.objects[i] == m.picked) {
+                gameState.isHeld[i] = m.picker != null;
             }
         }
     }
 
     private void Start()
     {
-        isHeld = new bool[objects.Length];
     }
 
     private void OnEnable()
@@ -44,10 +40,5 @@ public class GameLogicController : MonoBehaviour
     private void OnDisable()
     {
         PlayerPick.RemoveListener(PlayerPickup);
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
     }
 }

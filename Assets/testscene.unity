@@ -298,6 +298,8 @@ MonoBehaviour:
   - {fileID: 995052662}
   - {fileID: 0}
   isHeld: 
+  windScale: 0.02
+  windShiftSpeed: 0.02
 --- !u!1001 &394293383
 PrefabInstance:
   m_ObjectHideFlags: 0

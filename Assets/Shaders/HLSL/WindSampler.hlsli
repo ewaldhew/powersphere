@@ -9,13 +9,12 @@ SAMPLER(sampler_WindTex);
 CBUFFER_START(UnityPerMaterial)
     float _WindFrequency;
     float _WindShiftSpeed;
-    float4 _WindTex_ST;
+    float _AnimTime;
 CBUFFER_END
 
 float3 WindVelocity(float3 pos_WS)
 {
-    float2 uv = TRANSFORM_TEX(pos_WS.xz, _WindTex) * _WindFrequency
-        + float2(0, _Time.y * _WindShiftSpeed);
+    float2 uv = pos_WS.xz * _WindFrequency + float2(0, _AnimTime * _WindShiftSpeed);
     float3 wind = SAMPLE_TEXTURE2D_LOD(_WindTex, sampler_WindTex, uv, 0).xyz;
     return float3(wind.x, 0, wind.y) * wind.z;
 }

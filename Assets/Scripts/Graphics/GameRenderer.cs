@@ -16,6 +16,7 @@ public class GameRenderer : MonoBehaviour
     {
         Shader.SetGlobalFloat("_WindFrequency", 0.02f);
         Shader.SetGlobalFloat("_WindShiftSpeed", 0.02f);
+        Shader.SetGlobalFloat("_AnimTime", Time.timeSinceLevelLoad);
 
         Shader.SetGlobalVector("_PlayerPosition", gameState.player.transform.position);
         Shader.SetGlobalFloat("_GrassSquashRadius", gameState.player.radius * 1.2f);

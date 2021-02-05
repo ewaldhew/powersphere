@@ -1,6 +1,7 @@
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
 #include "Util.hlsli"
+#include "WindSampler.hlsli"
 
 #define NUM_BLADES 5
 #define NUM_SEGMENTS 4
@@ -93,6 +94,12 @@ void geom(point vertOut IN[1], inout TriangleStream<geomOut> triStream)
 
         float3x3 facingMatrix = AngleAxis3x3(rand(bladeBasePos.zxy) * TWO_PI, float3(0, 0, 1));
 
+        float3 wind = WindVelocity(bladeBasePos);
+        wind = normalize(wind);
+        float windFactor = saturate(abs(dot(wind, bitangent)));
+        float3 bendAxis = -cross(wind, normal);
+        float3x3 windBendMatrix = AngleAxis3x3(windFactor * 0.05 * PI, bendAxis);
+
         float3x3 transform = mul(facingMatrix, tangentToWorldMatrix);
 
         float bladeLean = _Lean;
@@ -113,6 +120,9 @@ void geom(point vertOut IN[1], inout TriangleStream<geomOut> triStream)
             triStream.Append(outputToVertexStream(OUT, bladeBasePos, offset * float3(-1, 1, 1), prevOffset, transform));
             prevOffset = offset;
 
+            if (segment == 0) {
+                transform = mul(transform, windBendMatrix);
+            }
             if (segment == 1) {
                 transform = mul(transform, squashingMatrix);
             }

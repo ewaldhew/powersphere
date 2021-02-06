@@ -31,4 +31,4 @@ Material:
     - _Width: 0.07
     m_Colors:
     - _BaseColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-    - _Color: {r: 0.09999997, g: 1, b: 0.09999997, a: 1}
+    - _Color: {r: 0, g: 1, b: 0, a: 1}

@@ -1,9 +1,16 @@
 ﻿using UnityEngine;
 
+public struct PowerSphereState
+{
+    public Vector3 position;
+    public bool isHeld;
+}
+
 public class GameState : MonoBehaviour
 {
-    // Game State
     public CharacterController player;
+
+    // Interactive objects tracking
     public GameObject[] objects;
     public bool[] isHeld;
 
@@ -14,4 +21,16 @@ public class GameState : MonoBehaviour
     {
         isHeld = new bool[objects.Length];
     }
+
+    public PowerSphereState colorSphere
+    {
+        get
+        {
+            return new PowerSphereState {
+                position = objects[0].transform.position,
+                isHeld = isHeld[0],
+            };
+        }
+    }
+
 }

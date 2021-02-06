@@ -5,6 +5,8 @@
 // lighting and shadow functions
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 
+float4 _ColorSpherePositionAndRadius;
+
 struct LightingInput
 { // vertex data
     float2 uv;
@@ -38,6 +40,10 @@ struct SurfaceInput
 
 half4 ResolveLighting(LightingInput input, SurfaceInput surfaceData)
 {
+    float3 distVec = _ColorSpherePositionAndRadius.xyz - input.positionWSAndFogFactor.xyz;
+    bool isInColorSphereInfluence = dot(distVec, distVec) < _ColorSpherePositionAndRadius.w;
+    surfaceData.albedo = isInColorSphereInfluence ? surfaceData.albedo : half3(.05, .05, .05);
+
 #if _NORMALMAP
     half3 normalWS = TransformTangentToWorld(surfaceData.normalTS,
     half3x3(input.tangentWS, input.bitangentWS, input.normalWS));

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+using static VectorUtil;
+
 public class GameRenderer : MonoBehaviour
 {
     [SerializeField]
@@ -26,8 +28,14 @@ public class GameRenderer : MonoBehaviour
         windSampler._WindFrequency = gameState.windScale;
         windSampler._WindShiftSpeed = gameState.windShiftSpeed;
 
+        ref var player = ref gameState.player;
+        Vector3 playerPosition = player.transform.position;
         Shader.SetGlobalVector("_PlayerPosition", gameState.player.transform.position);
         Shader.SetGlobalFloat("_GrassSquashRadius", gameState.player.radius * 1.2f);
         Shader.SetGlobalFloat("_GrassSquashStrength", 0.5f * Mathf.PI);
+
+        var colorSphere = gameState.colorSphere;
+        Vector3 colorSpherePosition = colorSphere.isHeld ? playerPosition : colorSphere.position;
+        Shader.SetGlobalVector("_ColorSpherePositionAndRadius", Vector4(colorSpherePosition, 10f));
     }
 }

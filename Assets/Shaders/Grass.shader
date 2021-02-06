@@ -25,7 +25,6 @@
             HLSLPROGRAM
             #pragma target 3.0
 
-            // TEMPLATE SOURCE: https://gist.github.com/phi-lira/225cd7c5e8545be602dca4eb5ed111ba
             // -------------------------------------
             // Material Keywords
             // unused shader_feature variants are stripped from build automatically

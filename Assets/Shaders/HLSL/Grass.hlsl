@@ -1,7 +1,11 @@
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
-#include "Util.hlsli"
-#include "WindSampler.hlsli"
+#undef _NORMALMAP
+#undef _MAIN_LIGHT_SHADOWS
+#include "Include/Lighting.hlsl"
+
+#include "Include/Util.hlsl"
+#include "Include/WindSampler.hlsl"
 
 #define NUM_BLADES 5
 #define NUM_SEGMENTS 4
@@ -132,10 +136,23 @@ void geom(point vertOut IN[1], inout TriangleStream<geomOut> triStream)
     }
 }
 
-float4 frag(geomOut IN, float facing : VFACE) : SV_Target
+half4 frag(geomOut IN, float facing : VFACE) : SV_Target
 {
-    float3 N = IN.normal_WS * sign(facing);
-    float NdotL = saturate(dot(N, _MainLightPosition.xyz));
-    float4 col = _Color + float4(NdotL * _MainLightColor.rgb, 1);
-    return col;
+    LightingInput lightingInput;
+    lightingInput.uv = IN.uv;
+    lightingInput.positionWSAndFogFactor = float4(IN.pos_WS.xyz, 0); // xyz: positionWS, w: vertex fog factor
+    lightingInput.normalWS = IN.normal_WS * sign(facing);
+    lightingInput.positionCS = IN.pos_CS;
+
+    SurfaceInput surfaceInput;
+    surfaceInput.albedo = _Color;
+    surfaceInput.specular = 0;
+    surfaceInput.metallic = 0;
+    surfaceInput.smoothness = 1;
+    surfaceInput.normalTS = float3(0, 0, 1);
+    surfaceInput.emission = 0;
+    surfaceInput.occlusion = 1;
+    surfaceInput.alpha = 1;
+
+    return ResolveLighting(lightingInput, surfaceInput);
 }

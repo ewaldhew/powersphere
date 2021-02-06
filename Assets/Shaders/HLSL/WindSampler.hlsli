@@ -14,7 +14,7 @@ CBUFFER_END
 
 float3 WindVelocity(float3 pos_WS)
 {
-    float2 uv = pos_WS.xz * _WindFrequency + float2(0, _AnimTime * _WindShiftSpeed);
+    float2 uv = pos_WS.xz * _WindFrequency + _AnimTime * _WindShiftSpeed;
     float3 wind = SAMPLE_TEXTURE2D_LOD(_WindTex, sampler_WindTex, uv, 0).xyz;
     return float3(wind.x, 0, wind.y) * wind.z;
 }

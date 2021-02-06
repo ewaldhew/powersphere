@@ -38,10 +38,20 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 3589566373726373018}
     m_Modifications:
-    - target: {fileID: 7126834695521861996, guid: 37ff5dafe824cb045a19f983787808dd,
+    - target: {fileID: 4997107305632434140, guid: 37ff5dafe824cb045a19f983787808dd,
         type: 3}
-      propertyPath: m_Name
-      value: Ramp_3m
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 7126834695521861992, guid: 37ff5dafe824cb045a19f983787808dd,
+        type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 7126834695521861993, guid: 37ff5dafe824cb045a19f983787808dd,
+        type: 3}
+      propertyPath: m_RootOrder
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7126834695521861993, guid: 37ff5dafe824cb045a19f983787808dd,
         type: 3}
@@ -60,6 +70,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7126834695521861993, guid: 37ff5dafe824cb045a19f983787808dd,
         type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.00000053644175
+      objectReference: {fileID: 0}
+    - target: {fileID: 7126834695521861993, guid: 37ff5dafe824cb045a19f983787808dd,
+        type: 3}
       propertyPath: m_LocalRotation.x
       value: -0
       objectReference: {fileID: 0}
@@ -72,16 +87,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalRotation.z
       value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7126834695521861993, guid: 37ff5dafe824cb045a19f983787808dd,
-        type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 0.00000053644175
-      objectReference: {fileID: 0}
-    - target: {fileID: 7126834695521861993, guid: 37ff5dafe824cb045a19f983787808dd,
-        type: 3}
-      propertyPath: m_RootOrder
-      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7126834695521861993, guid: 37ff5dafe824cb045a19f983787808dd,
         type: 3}
@@ -98,12 +103,12 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 7126834695521861997, guid: 37ff5dafe824cb045a19f983787808dd,
+    - target: {fileID: 7126834695521861996, guid: 37ff5dafe824cb045a19f983787808dd,
         type: 3}
-      propertyPath: m_Mesh
-      value: 
+      propertyPath: m_Name
+      value: Ramp_3m
       objectReference: {fileID: 0}
-    - target: {fileID: 7126834695521861992, guid: 37ff5dafe824cb045a19f983787808dd,
+    - target: {fileID: 7126834695521861997, guid: 37ff5dafe824cb045a19f983787808dd,
         type: 3}
       propertyPath: m_Mesh
       value: 

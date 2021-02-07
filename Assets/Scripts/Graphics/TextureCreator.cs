@@ -29,6 +29,21 @@ public static class TextureCreator
         return tex;
     }
 
+    public static Texture2D PerlinCloudsTiling(int size, int seed)
+    {
+        Texture2D tex = GetTexture2D(size, "PerlinCloudsTiling" + TextureIndex++);
+        float step = 1.0f / size;
+        for (int y = 0; y < size; y++) {
+            for (int x = 0; x < size; x++) {
+                Vector2 uv = new Vector2((x + 0.5f) * step, (y + 0.5f) * step);
+                Vector3 samplepos = new Vector3(uv.x - 0.5f, seed * uv.x + uv.y - 0.5f, 0.0f);
+                tex.SetPixel(x, y, Color.white * (Noise.Eval2DFrac(samplepos.x, samplepos.y, 8, 6, 1) * 0.5f + 0.5f));
+            }
+        }
+        tex.Apply();
+        return tex;
+    }
+
     public static Texture2D PerlinCurl(int size, int seed)
     {
         Texture2D tex = GetTexture2D(size, "PerlinCurl" + TextureIndex++);

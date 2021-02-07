@@ -17,6 +17,9 @@ public class GameRenderer : MonoBehaviour
         Shader.SetGlobalTexture("_WindTex", windTex);
         windSampler = new WindSampler();
         windSampler._WindTex = windTex;
+
+        Texture2D noiseTex = TextureCreator.PerlinCloudsTiling(256, 0);
+        Shader.SetGlobalTexture("_NoiseTex", noiseTex);
     }
 
     void LateUpdate()
@@ -36,6 +39,6 @@ public class GameRenderer : MonoBehaviour
 
         var colorSphere = gameState.colorSphere;
         Vector3 colorSpherePosition = colorSphere.isHeld ? playerPosition : colorSphere.position;
-        Shader.SetGlobalVector("_ColorSpherePositionAndRadius", Vector4(colorSpherePosition, 10f));
+        Shader.SetGlobalVector("_ColorSpherePositionAndRadius", Vector4(colorSpherePosition, 5f));
     }
 }

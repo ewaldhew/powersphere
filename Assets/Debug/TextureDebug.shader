@@ -2,7 +2,7 @@
 {
     Properties
     {
-        //[MainTexture] _DebugTex ("Texture", 2D) = "white" {}
+        [MainTexture] _DebugTex ("Texture", 2D) = "white" {}
     }
     SubShader
     {
@@ -18,8 +18,6 @@
             #pragma multi_compile_fog
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-
-            #include "HLSL/WindSampler.hlsli"
 
             struct appdata
             {
@@ -43,10 +41,12 @@
                 return o;
             }
 
+            TEXTURE2D(_DebugTex);
+            SAMPLER(sampler_DebugTex);
+
             float4 frag (v2f i) : SV_Target
             {
-                // sample the texture
-                return float4(WindVelocity(i.pos) * 0.5 + 0.5, 1);
+                return SAMPLE_TEXTURE2D(_DebugTex, sampler_DebugTex, i.uv);
             }
             ENDHLSL
         }

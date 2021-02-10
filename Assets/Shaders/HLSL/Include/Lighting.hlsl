@@ -44,6 +44,10 @@ half4 ResolveLighting(LightingInput input, SurfaceInput surfaceData)
 {
     float3 positionWS = input.positionWSAndFogFactor.xyz;
 
+    float sphereRadius = _ColorSpherePositionAndRadius.w;
+    bool isInner = sphereRadius < 0;
+    bool isOuter = false;
+
     half3 colorInner = surfaceData.albedo;
     half3 colorOuter = half3(.05, .05, .05);
 
@@ -60,8 +64,8 @@ half4 ResolveLighting(LightingInput input, SurfaceInput surfaceData)
 
     const float cutoff = 0.05f; // min closeness
     const float width = 0.05f;
-    bool isInner = closeness - width > cutoff && noise2 < 0.5f;
-    bool isOuter = closeness < cutoff;
+    isInner = isInner || closeness - width > cutoff && noise2 < 0.5f;
+    isOuter = isOuter || closeness < cutoff;
 
     half3 colorBoundary = half3(1, 1, 1);
     surfaceData.albedo = isInner*colorInner + isOuter*colorOuter + !isInner*!isOuter*colorBoundary;

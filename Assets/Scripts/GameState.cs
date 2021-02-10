@@ -55,4 +55,19 @@ public class GameState : MonoBehaviour
         return System.Array.IndexOf(objects, obj);
     }
 
+    private void Update()
+    {
+        for (int i = 0; i < objectStates.Length; i++) {
+            ref ObjectState powerSphere = ref objectStates[i];
+            if (powerSphere.isInGoal && powerSphere.influenceRadius > 0) {
+                const float targetRadius = 200f;
+                float currentRadius = powerSphere.influenceRadius;
+                float newRadius = currentRadius * 1.1f;
+                if (targetRadius - currentRadius < 10f) {
+                    newRadius = -1;
+                }
+                powerSphere.influenceRadius = newRadius;
+            }
+        }
+    }
 }

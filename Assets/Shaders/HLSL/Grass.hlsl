@@ -71,7 +71,8 @@ geomOut outputToVertexStream(geomOut base, float3 basePos, float3 offset, float3
 void geom(point vertOut IN[1], inout TriangleStream<geomOut> triStream)
 {
     float3 distVec = _ColorSpherePositionAndRadius.xyz - IN[0].pos_WS.xyz;
-    bool isInColorSphereInfluence = dot(distVec, distVec) < _ColorSpherePositionAndRadius.w * _ColorSpherePositionAndRadius.w;
+    bool isInColorSphereInfluence = _ColorSpherePositionAndRadius.w < 0 ||
+        dot(distVec, distVec) < _ColorSpherePositionAndRadius.w * _ColorSpherePositionAndRadius.w;
     if (!isInColorSphereInfluence) { return; }
 
     float4 pos_WS = IN[0].pos_WS;

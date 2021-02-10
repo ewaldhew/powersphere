@@ -39,6 +39,6 @@ public class GameRenderer : MonoBehaviour
 
         var colorSphere = gameState.colorSphere;
         Vector3 colorSpherePosition = colorSphere.isHeld ? playerPosition : colorSphere.position;
-        Shader.SetGlobalVector("_ColorSpherePositionAndRadius", Vector4(colorSpherePosition, 5f));
+        Shader.SetGlobalVector("_ColorSpherePositionAndRadius", Vector4(colorSpherePosition, colorSphere.radius));
     }
 }

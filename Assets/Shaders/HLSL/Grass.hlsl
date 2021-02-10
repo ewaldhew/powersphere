@@ -6,6 +6,7 @@
 
 #include "Include/Util.hlsl"
 #include "Include/WindSampler.hlsl"
+#include "Include/PowerSpheres.hlsl"
 
 #define NUM_BLADES 5
 #define NUM_SEGMENTS 4
@@ -70,10 +71,10 @@ geomOut outputToVertexStream(geomOut base, float3 basePos, float3 offset, float3
 [maxvertexcount(NUM_BLADES * (NUM_SEGMENTS * 2 + 1))]
 void geom(point vertOut IN[1], inout TriangleStream<geomOut> triStream)
 {
-    float3 distVec = _ColorSpherePositionAndRadius.xyz - IN[0].pos_WS.xyz;
-    bool isInColorSphereInfluence = _ColorSpherePositionAndRadius.w < 0 ||
-        dot(distVec, distVec) < _ColorSpherePositionAndRadius.w * _ColorSpherePositionAndRadius.w;
-    if (!isInColorSphereInfluence) { return; }
+    if (!IsWithinSphere(IN[0].pos_WS.xyz, _ColorSpherePositionAndRadius) ||
+        !IsWithinSphere(IN[0].pos_WS.xyz, _GreenSpherePositionAndRadius)) {
+        return;
+    }
 
     float4 pos_WS = IN[0].pos_WS;
     float3 normal = IN[0].normal_WS;
@@ -107,7 +108,9 @@ void geom(point vertOut IN[1], inout TriangleStream<geomOut> triStream)
         wind = normalize(wind);
         float windFactor = saturate(abs(dot(wind, bitangent)));
         float3 bendAxis = cross(wind, normal);
-        float3x3 windBendMatrix = AngleAxis3x3(windFactor * 0.05 * PI, bendAxis);
+        float3x3 windBendMatrix = dot(wind, wind) > 0
+            ? AngleAxis3x3(windFactor * 0.05 * PI, bendAxis)
+            : (float3x3)IdentityMatrix;
 
         float3x3 transform = mul(facingMatrix, tangentToWorldMatrix);
 

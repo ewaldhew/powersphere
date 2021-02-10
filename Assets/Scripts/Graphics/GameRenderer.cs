@@ -31,14 +31,22 @@ public class GameRenderer : MonoBehaviour
         windSampler._WindFrequency = gameState.windScale;
         windSampler._WindShiftSpeed = gameState.windShiftSpeed;
 
-        ref var player = ref gameState.player;
-        Vector3 playerPosition = player.transform.position;
-        Shader.SetGlobalVector("_PlayerPosition", gameState.player.transform.position);
+        Vector3 playerPosition = gameState.player.transform.position;
+        Shader.SetGlobalVector("_PlayerPosition", playerPosition);
         Shader.SetGlobalFloat("_GrassSquashRadius", gameState.player.radius * 1.2f);
         Shader.SetGlobalFloat("_GrassSquashStrength", 0.5f * Mathf.PI);
 
-        var colorSphere = gameState.colorSphere;
-        Vector3 colorSpherePosition = colorSphere.isHeld ? playerPosition : colorSphere.position;
-        Shader.SetGlobalVector("_ColorSpherePositionAndRadius", Vector4(colorSpherePosition, colorSphere.radius));
+        var colorSphere = gameState.GetColorSphere();
+        Vector4 colorSpherePositionAndRadius = Vector4(colorSphere.position, colorSphere.radius);
+        Shader.SetGlobalVector("_ColorSpherePositionAndRadius", Vector4(colorSphere.position, colorSphere.radius));
+
+        var windSphere = gameState.GetWindSphere();
+        Vector4 windSpherePositionAndRadius = Vector4(windSphere.position, windSphere.radius);
+        Shader.SetGlobalVector("_WindSpherePositionAndRadius", windSpherePositionAndRadius);
+        windSampler._WindSpherePositionAndRadius = windSpherePositionAndRadius;
+
+        var greenSphere = gameState.GetGreenSphere();
+        Vector4 greenSpherePositionAndRadius = Vector4(greenSphere.position, greenSphere.radius);
+        Shader.SetGlobalVector("_GreenSpherePositionAndRadius", greenSpherePositionAndRadius);
     }
 }

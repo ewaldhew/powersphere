@@ -23,11 +23,8 @@ public class GameLogicController : MonoBehaviour
 
     void OnPlayerPickup(MessageTypes.Pickup m)
     {
-        for (int i = 0; i < gameState.objects.Length; i++) {
-            if (gameState.objects[i] == m.picked) {
-                gameState.objectStates[i].isHeld = m.picker != null;
-            }
-        }
+        int objIndex = gameState.findObjectIndex(m.picked);
+        gameState.objectStates[objIndex].isHeld = m.picker != null;
     }
 
     void OnPowerSphereGoal(MessageTypes.Goal m)
@@ -49,5 +46,21 @@ public class GameLogicController : MonoBehaviour
     {
         PlayerPick.RemoveListener(OnPlayerPickup);
         PowerSphereGoal.RemoveListener(OnPowerSphereGoal);
+    }
+
+    private void Update()
+    {
+        for (int i = 0; i < gameState.objectStates.Length; i++) {
+            ref ObjectState powerSphere = ref gameState.objectStates[i];
+            if (powerSphere.isInGoal && powerSphere.influenceRadius > 0) {
+                const float targetRadius = 200f;
+                float currentRadius = powerSphere.influenceRadius;
+                float newRadius = currentRadius * 1.1f;
+                if (targetRadius - currentRadius < 10f) {
+                    newRadius = -1;
+                }
+                powerSphere.influenceRadius = newRadius;
+            }
+        }
     }
 }

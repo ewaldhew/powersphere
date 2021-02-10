@@ -5,9 +5,7 @@
 // lighting and shadow functions
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 
-float4 _ColorSpherePositionAndRadius;
-TEXTURE2D(_NoiseTex);
-SAMPLER(sampler_NoiseTex);
+#include "PowerSpheres.hlsl"
 
 struct LightingInput
 { // vertex data
@@ -44,33 +42,15 @@ half4 ResolveLighting(LightingInput input, SurfaceInput surfaceData)
 {
     float3 positionWS = input.positionWSAndFogFactor.xyz;
 
-    float sphereRadius = _ColorSpherePositionAndRadius.w;
-    bool isInner = sphereRadius < 0;
-    bool isOuter = false;
+    ColorSphereInfluence colorSphereInfluence = getColorSphereInfluence(surfaceData.albedo, positionWS, _ColorSpherePositionAndRadius);
+    surfaceData.albedo = (_ColorSpherePositionAndRadius.w > 0) * colorSphereInfluence.albedoSwap;
+    surfaceData.emission = colorSphereInfluence.base.boundaryColor;
 
-    half3 colorInner = surfaceData.albedo;
-    half3 colorOuter = half3(.05, .05, .05);
+    SphereInfluence windSphereInfluence = getSphereInfluence(half3(0, 0, 1), positionWS, _WindSpherePositionAndRadius);
+    surfaceData.albedo += windSphereInfluence.boundaryColor;
 
-    float3 distVec = _ColorSpherePositionAndRadius.xyz - positionWS;
-    float3 d = normalize(distVec);
-    float2 uv = float2(-atan2(d.x, d.z) * 0.5, -asin(d.y)) * INV_PI + 0.5;
-    float noise = SAMPLE_TEXTURE2D(_NoiseTex, sampler_NoiseTex, uv + _Time.x).r;
-    float noise2 = SAMPLE_TEXTURE2D(_NoiseTex, sampler_NoiseTex, (positionWS.xz * 0.1f) + _Time.x).r;
-    noise2 *= length(distVec.xz) / _ColorSpherePositionAndRadius.w;
-
-    float dist = length(distVec);
-    float closeness = 1 - saturate(dist / _ColorSpherePositionAndRadius.w); // 1 at the center
-    closeness *= noise;
-
-    const float cutoff = 0.05f; // min closeness
-    const float width = 0.05f;
-    isInner = isInner || closeness - width > cutoff && noise2 < 0.5f;
-    isOuter = isOuter || closeness < cutoff;
-
-    half3 colorBoundary = half3(1, 1, 1);
-    surfaceData.albedo = isInner*colorInner + isOuter*colorOuter + !isInner*!isOuter*colorBoundary;
-    surfaceData.emission = !isInner * !isOuter * colorBoundary;
-
+    SphereInfluence greenSphereInfluence = getSphereInfluence(half3(0, 1, 0), positionWS, _GreenSpherePositionAndRadius);
+    surfaceData.albedo += greenSphereInfluence.boundaryColor;
 
 #if _NORMALMAP
     half3 normalWS = TransformTangentToWorld(surfaceData.normalTS,

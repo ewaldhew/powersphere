@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Events;
 
 using GameEvents;
@@ -9,6 +7,9 @@ namespace GameEvents
 {
     [System.Serializable]
     public class PlayerPickupEvent : UnityEvent<MessageTypes.Pickup> { }
+
+    [System.Serializable]
+    public class PowerSphereGoalEvent : UnityEvent<MessageTypes.Goal> { }
 }
 
 public class GameLogicController : MonoBehaviour
@@ -17,28 +18,36 @@ public class GameLogicController : MonoBehaviour
     GameState gameState;
 
     // Events
-    [SerializeField]
     public static PlayerPickupEvent PlayerPick = new PlayerPickupEvent();
+    public static PowerSphereGoalEvent PowerSphereGoal = new PowerSphereGoalEvent();
 
-    void PlayerPickup(MessageTypes.Pickup m)
+    void OnPlayerPickup(MessageTypes.Pickup m)
     {
         for (int i = 0; i < gameState.objects.Length; i++) {
             if (gameState.objects[i] == m.picked) {
-                gameState.isHeld[i] = m.picker != null;
+                gameState.objectStates[i].isHeld = m.picker != null;
             }
         }
     }
 
-    private void Start()
+    void OnPowerSphereGoal(MessageTypes.Goal m)
     {
+        m.powerSphere.SetActive(false);
+        m.goal.SetActive(false);
+
+        int objIndex = gameState.findObjectIndex(m.powerSphere);
+        gameState.objectStates[objIndex].isHeld = false;
+        gameState.objectStates[objIndex].isInGoal = true;
     }
 
     private void OnEnable()
     {
-        PlayerPick.AddListener(PlayerPickup);
+        PlayerPick.AddListener(OnPlayerPickup);
+        PowerSphereGoal.AddListener(OnPowerSphereGoal);
     }
     private void OnDisable()
     {
-        PlayerPick.RemoveListener(PlayerPickup);
+        PlayerPick.RemoveListener(OnPlayerPickup);
+        PowerSphereGoal.RemoveListener(OnPowerSphereGoal);
     }
 }

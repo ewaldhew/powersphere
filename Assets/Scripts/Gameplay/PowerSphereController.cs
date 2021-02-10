@@ -64,6 +64,8 @@ public class PowerSphereController : MonoBehaviour
         rootObject.transform.localPosition = holdOffsets[m.slotIndex];
         rootBody.isKinematic = true;
 
+        rootObject.SendMessage("OnPickup", SendMessageOptions.DontRequireReceiver);
+
         m.picked = rootObject;
         GameLogicController.PlayerPick.Invoke(m);
     }
@@ -84,6 +86,8 @@ public class PowerSphereController : MonoBehaviour
         rootBody.AddForce(rollVec * playerCollider.bounds.size.sqrMagnitude, ForceMode.Impulse);
 
         selfCollider.enabled = true;
+
+        rootObject.SendMessage("OnDrop", SendMessageOptions.DontRequireReceiver);
 
         GameLogicController.PlayerPick.Invoke(new MessageTypes.Pickup {
             picker = null,

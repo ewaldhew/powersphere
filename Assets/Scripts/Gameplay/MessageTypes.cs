@@ -8,4 +8,10 @@ namespace MessageTypes
         public GameObject picked;
         public int slotIndex;
     }
+
+    public struct Goal
+    {
+        public GameObject powerSphere;
+        public GameObject goal;
+    }
 }

@@ -6,21 +6,28 @@ using UnityEngine;
 public class GrassGrower : MonoBehaviour
 {
     const int MAX_CLUSTERS = 200;
+    const int MAX_GRID_CELLS = 4;
 
     [SerializeField, Range(1, MAX_CLUSTERS),
         Tooltip("Number of grass clusters to generate")]
-    public int grassDensity = 100;
+    public int grassDensityPerCell = 100;
+
+    [SerializeField, Min(1),
+        Tooltip("Number of subdivisions per axis to use")]
+    public Vector2Int gridSize = Vector2Int.one;
 
     private int prevGrassDensity = 0;
-    private Vector2[] halton = new Vector2[MAX_CLUSTERS];
+    private Vector2[] halton;
 
     private void Start()
     {
-        halton = GenerateHalton23(MAX_CLUSTERS);
+        halton = GenerateHalton23(MAX_CLUSTERS * MAX_GRID_CELLS);
     }
 
     private void Update()
     {
+        int grassDensity = grassDensityPerCell * gridSize.x * gridSize.y;
+
         if (grassDensity == prevGrassDensity) {
             return;
         }
@@ -33,13 +40,23 @@ public class GrassGrower : MonoBehaviour
 
         Vector3 normal = Vector3.up;
         Vector4 tangent = new Vector4(1, 0, 0, -1);
-        for (int i = 0; i < grassDensity; i++) {
-            Vector2 uv = halton[i];
-            indices[i] = i;
-            vertices[i] = new Vector3(uv.x - 0.5f, 0, uv.y - 0.5f);
-            uvCoords[i] = uv;
-            normals[i] = normal;
-            tangents[i] = tangent;
+
+        int ind = 0;
+        Vector2 uvStep = Vector2.one / gridSize;
+        for (int x = 0; x < gridSize.x; x++) {
+            for (int y = 0; y < gridSize.y; y++) {
+                Vector2 uvStart = uvStep * new Vector2(x, y);
+                for (int i = 0; i < grassDensityPerCell; i++) {
+                    Vector2 uvRel = GetHalton(i, x * gridSize.y + y);
+                    Vector2 uv = uvStart + uvRel * uvStep;
+                    indices[ind] = ind;
+                    vertices[ind] = new Vector3(uv.x - 0.5f, 0, uv.y - 0.5f);
+                    uvCoords[ind] = uv;
+                    normals[ind] = normal;
+                    tangents[ind] = tangent;
+                    ind++;
+                }
+            }
         }
 
         Mesh mesh = GetComponent<MeshFilter>().mesh = new Mesh();
@@ -50,6 +67,45 @@ public class GrassGrower : MonoBehaviour
         mesh.normals = normals;
         mesh.tangents = tangents;
         mesh.RecalculateBounds(); // XXX: Does not account for grass height!
+
+        prevGrassDensity = grassDensity;
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.matrix = transform.localToWorldMatrix;
+        Gizmos.color = new Color(0, 1, 0, 0.4f);
+        Gizmos.DrawCube(Vector3.zero, new Vector3(1, 0, 1));
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.matrix = transform.localToWorldMatrix;
+        Gizmos.DrawWireCube(Vector3.zero, new Vector3(1, 0, 1));
+
+        Vector2 gridStep = Vector2.one / gridSize;
+        // horizontal lines
+        for (int i = 1; i < gridSize.x; i++) {
+            float x = i * gridStep.x - 0.5f;
+            Gizmos.DrawLine(new Vector3(x, 0, -.5f), new Vector3(x, 0, .5f));
+        }
+
+        // draw the vertical lines
+        for (int i = 1; i < gridSize.y; i++) {
+            float y = i * gridStep.y - 0.5f;
+            Gizmos.DrawLine(new Vector3(-.5f, 0, y), new Vector3(.5f, 0, y));
+        }
+    }
+
+    private Vector2 GetHalton(int index, int skip)
+    {
+        if (skip < MAX_GRID_CELLS) {
+            // sequentially from the skip-th block
+            return halton[skip * MAX_CLUSTERS + index];
+        } else {
+            // add skip to the front, take every 7th element wrapping around
+            return halton[(index * 7 + skip) % halton.Length];
+        }
     }
 
     private Vector2[] GenerateHalton23(uint length)

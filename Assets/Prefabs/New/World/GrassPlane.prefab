@@ -93,3 +93,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   grassDensity: 100
+  gridSize: {x: 1, y: 1}

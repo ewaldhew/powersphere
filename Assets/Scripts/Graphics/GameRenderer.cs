@@ -35,6 +35,7 @@ public class GameRenderer : MonoBehaviour
         Shader.SetGlobalVector("_PlayerPosition", playerPosition);
         Shader.SetGlobalFloat("_GrassSquashRadius", gameState.player.radius * 1.2f);
         Shader.SetGlobalFloat("_GrassSquashStrength", 0.5f * Mathf.PI);
+        Shader.SetGlobalVector("_GrassLOD", new Vector4(15f, 15f, 5f, 10f));
 
         var colorSphere = gameState.GetColorSphere();
         Vector4 colorSpherePositionAndRadius = Vector4(colorSphere.position, colorSphere.radius);

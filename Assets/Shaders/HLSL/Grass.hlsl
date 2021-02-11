@@ -8,8 +8,8 @@
 #include "Include/WindSampler.hlsl"
 #include "Include/PowerSpheres.hlsl"
 
-#define NUM_BLADES 5
-#define NUM_SEGMENTS 4
+#define MAX_NUM_BLADES 5
+#define MAX_NUM_SEGMENTS 4
 
 float _Radius;
 float _Height;
@@ -21,6 +21,7 @@ float4 _Color;
 float3 _PlayerPosition;
 float _GrassSquashRadius;
 float _GrassSquashStrength;
+float4 _GrassLOD;
 
 struct appdata
 {
@@ -68,7 +69,7 @@ geomOut outputToVertexStream(geomOut base, float3 basePos, float3 offset, float3
     return OUT;
 }
 
-[maxvertexcount(NUM_BLADES * (NUM_SEGMENTS * 2 + 1))]
+[maxvertexcount(MAX_NUM_BLADES * (MAX_NUM_SEGMENTS * 2 + 1))]
 void geom(point vertOut IN[1], inout TriangleStream<geomOut> triStream)
 {
     if (!IsWithinSphere(IN[0].pos_WS.xyz, _ColorSpherePositionAndRadius) ||
@@ -90,9 +91,17 @@ void geom(point vertOut IN[1], inout TriangleStream<geomOut> triStream)
     geomOut OUT;
     OUT.center_WS = pos_WS;
 
+    // calculate LOD factor
+    float distanceFromCamera = distance(GetCameraPositionWS(), pos_WS);
+    float lodFactor1 = 1.0f - saturate((distanceFromCamera - _GrassLOD.x) / _GrassLOD.y);
+    float lodFactor2 = 1.0f - saturate((distanceFromCamera - _GrassLOD.z) / _GrassLOD.w);
+
+    const int numBlades = max(1, ceil(lodFactor1 * MAX_NUM_BLADES));
+    const int numSegments = max(1, ceil(lodFactor2 * MAX_NUM_SEGMENTS));
+
     [unroll]
-    for (int blade = 0; blade < NUM_BLADES; blade++) {
-        float r = blade / (float)NUM_BLADES * TWO_PI;
+    for (int blade = 0; blade < numBlades; blade++) {
+        float r = blade / (float)numBlades * TWO_PI;
         float sinr, cosr;
         sincos(r, sinr, cosr);
         float3 bladeBasePos = pos_WS.xyz + (tangent * -sinr + bitangent * cosr) * _Radius;
@@ -120,8 +129,8 @@ void geom(point vertOut IN[1], inout TriangleStream<geomOut> triStream)
 
         float3 prevOffset = float3(0, 0, -1);
         [unroll]
-        for (int segment = 0; segment < NUM_SEGMENTS; segment++) {
-            float t = segment / (float)NUM_SEGMENTS;
+        for (int segment = 0; segment < numSegments; segment++) {
+            float t = segment / (float)numSegments;
             float3 offset = float3(
                 (1 - t) * bladeWidth,
                 t * t * bladeLean,

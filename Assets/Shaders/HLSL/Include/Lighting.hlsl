@@ -43,7 +43,7 @@ half4 ResolveLighting(LightingInput input, SurfaceInput surfaceData)
     float3 positionWS = input.positionWSAndFogFactor.xyz;
 
     ColorSphereInfluence colorSphereInfluence = getColorSphereInfluence(surfaceData.albedo, positionWS, _ColorSpherePositionAndRadius);
-    surfaceData.albedo = (_ColorSpherePositionAndRadius.w > 0) * colorSphereInfluence.albedoSwap;
+    surfaceData.albedo = lerp(surfaceData.albedo, colorSphereInfluence.albedoSwap, _ColorSpherePositionAndRadius.w > 0);
     surfaceData.emission = colorSphereInfluence.base.boundaryColor;
 
     SphereInfluence windSphereInfluence = getSphereInfluence(half3(0, 0, 1), positionWS, _WindSpherePositionAndRadius);

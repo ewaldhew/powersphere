@@ -37,6 +37,21 @@ float3x3 AngleAxis3x3(float angle, float3 axis)
     );
 }
 
+// Construct a rotation matrix that rotates first vector onto second vector
+// https://math.stackexchange.com/a/476311
+float3x3 RotateTowards(float3 from, float3 to)
+{
+    float3 axb = cross(from, to);
+    float c = dot(from, to);
+    float3x3 v = float3x3(
+        0, -axb.z, axb.y,
+        axb.z, 0, -axb.x,
+        -axb.y, axb.x, 0
+    );
+
+    return float3x3(1, 0, 0, 0, 1, 0, 0, 0, 1) + v + mul(v, v) / (1 + c);
+}
+
 
 inline bool IsWithinSphere(float3 testPos, float4 sphereCenterAndRadius)
 {

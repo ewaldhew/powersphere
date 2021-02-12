@@ -12,10 +12,16 @@ public class LeafWindParticle : MonoBehaviour
 
     [SerializeField]
     float windResistance = 1f;
+    [SerializeField]
+    int maxAfloat = 4;
+
+    [SerializeField]
+    bool debugViewVelocity = false;
 
     private ParticleSystem.Particle[] particles = { };
     private List<Vector4> particleRandom = new List<Vector4>();
-    int numParticles;
+    private int numParticles;
+    private HashSet<int> afloatIndices = new HashSet<int>();
 
     void LateUpdate()
     {
@@ -49,6 +55,7 @@ public class LeafWindParticle : MonoBehaviour
 
             bool isParticleInAir = Mathf.Abs(velocity.y) > Mathf.Epsilon;
             if (!isParticleInAir && velocity.magnitude < 1f) {
+                afloatIndices.Remove(i);
                 velocity = Vector3.zero;
             }
 
@@ -57,19 +64,22 @@ public class LeafWindParticle : MonoBehaviour
             } else {
                 counter = Random.value;
 
-                // give this one a kick based on the wind
+                if (afloatIndices.Count < maxAfloat) {
+                    // give this one a kick based on the wind
+                    afloatIndices.Add(i);
 
-                float windFactor = Vector3.Dot(wind, facingVector);
-                Vector3 targetVelocity = Mathf.Abs(windFactor) * wind;
+                    float windFactor = Vector3.Dot(wind, facingVector);
+                    Vector3 targetVelocity = Mathf.Abs(windFactor) * wind;
 
-                velocity = targetVelocity;
+                    velocity = targetVelocity;
 
-                // apply updraft
-                if (!isParticleInAir && windFactor > 0 && wind.magnitude > effectiveWindResistance) {
-                    velocity.y += windFactor * velocity.magnitude * facingVector.y;
+                    // apply updraft
+                    if (!isParticleInAir && windFactor > 0 && wind.magnitude > effectiveWindResistance) {
+                        velocity.y += windFactor * velocity.magnitude * facingVector.y;
+                    }
+
+                    facingVector = Vector3.RotateTowards(facingVector, velocity, 0.01f, 0);
                 }
-
-                facingVector = Vector3.RotateTowards(facingVector, velocity, 0.01f, 0);
             }
 
             if (isParticleInAir) {
@@ -94,6 +104,10 @@ public class LeafWindParticle : MonoBehaviour
 
     private void OnDrawGizmos()
     {
+        if (!debugViewVelocity) {
+            return;
+        }
+
         for (int i = 0; i < numParticles; i++) {
             bool isParticleInAir = Mathf.Abs(particles[i].velocity.y) > 0.001f;
             if (isParticleInAir) {

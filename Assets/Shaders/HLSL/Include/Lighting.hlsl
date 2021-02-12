@@ -34,9 +34,73 @@ struct SurfaceInput
     half3 emission;
     half occlusion;
     half alpha;
-    half clearCoatMask;
-    half clearCoatSmoothness;
 };
+
+// Computed lighting parameters
+struct SurfaceBRDFParams
+{
+    half3 albedo;
+    half3 diffuseColor;
+    half3 specular;
+    half3 smoothness;
+    half reflectivity;
+    half3 normal;
+};
+
+void CollectSurfaceData(half3 albedo, half metallic, half3 specular, half smoothness, inout half alpha, out SurfaceBRDFParams brdfParams)
+{
+#ifdef _SPECULAR_SETUP
+    half reflectivity = ReflectivitySpecular(specular);
+    half oneMinusReflectivity = 1.0 - reflectivity;
+    half3 brdfDiffuse = albedo * (half3(1.0h, 1.0h, 1.0h) - specular);
+    half3 brdfSpecular = specular;
+#else
+    half oneMinusReflectivity = OneMinusReflectivityMetallic(metallic);
+    half reflectivity = 1.0 - oneMinusReflectivity;
+    half3 brdfDiffuse = albedo * oneMinusReflectivity;
+    half3 brdfSpecular = lerp(kDieletricSpec.rgb, albedo, metallic);
+#endif
+
+    brdfParams = (SurfaceBRDFParams)0;
+    brdfParams.albedo = albedo;
+    brdfParams.diffuseColor = brdfDiffuse;
+    brdfParams.specular = brdfSpecular;
+    brdfParams.reflectivity = reflectivity;
+    brdfParams.smoothness = smoothness;
+}
+
+half3 LightingFunc(Light light, SurfaceBRDFParams brdfParams, half3 viewDir)
+{
+    // lambertian diffuse
+
+    float LdotN = saturate(dot(light.direction, brdfParams.normal));
+
+    half3 lightColor = light.shadowAttenuation * light.distanceAttenuation * light.color;
+    half3 lambertianColor = LdotN * brdfParams.diffuseColor * lightColor * INV_PI;
+
+    // cook-torrance specular
+
+    float3 halfVec = SafeNormalize(viewDir + light.direction);
+    float LdotH = saturate(dot(light.direction, halfVec));
+    float NdotH = saturate(dot(brdfParams.normal, halfVec));
+
+    float D = 0.0; // distribution
+    {
+        D = pow(NdotH, brdfParams.smoothness);
+        D *= (brdfParams.smoothness + 1) * 0.5 * INV_PI;
+    }
+
+    float FV = 0.0; // fresnel*visibility
+    {
+        FV = 1 / (LdotH * LdotH * LdotH);
+    }
+
+    half3 specularColor = brdfParams.specular * D * FV;
+
+    half3 color = lambertianColor + specularColor;
+
+    return color;
+}
 
 half4 ResolveLighting(LightingInput input, SurfaceInput surfaceData)
 {
@@ -71,12 +135,6 @@ half4 ResolveLighting(LightingInput input, SurfaceInput surfaceData)
 
     half3 viewDirectionWS = SafeNormalize(GetCameraPositionWS() - positionWS);
 
-    // BRDFData holds energy conserving diffuse and specular material reflections and its roughness.
-    // It's easy to plugin your own shading fuction. You just need replace LightingPhysicallyBased function
-    // below with your own.
-    BRDFData brdfData;
-    InitializeBRDFData(surfaceData.albedo, surfaceData.metallic, surfaceData.specular, surfaceData.smoothness, surfaceData.alpha, brdfData);
-
     // Light struct is provide by LWRP to abstract light shader variables.
     // It contains light direction, color, distanceAttenuation and shadowAttenuation.
     // LWRP take different shading approaches depending on light and platform.
@@ -93,11 +151,21 @@ half4 ResolveLighting(LightingInput input, SurfaceInput surfaceData)
     Light mainLight = GetMainLight();
 #endif
 
-    // Mix diffuse GI with environment reflections.
-    half3 color = GlobalIllumination(brdfData, bakedGI, surfaceData.occlusion, normalWS, viewDirectionWS);
+    // BRDFData holds energy conserving diffuse and specular material reflections and its roughness.
+    // It's easy to plugin your own shading fuction. You just need replace LightingPhysicallyBased function
+    // below with your own.
+    BRDFData brdfData;
+    InitializeBRDFData(surfaceData.albedo, surfaceData.metallic, surfaceData.specular, surfaceData.smoothness, surfaceData.alpha, brdfData);
 
-    // LightingPhysicallyBased computes direct light contribution.
-    color += LightingPhysicallyBased(brdfData, mainLight, normalWS, viewDirectionWS);
+    SurfaceBRDFParams surfData;
+    CollectSurfaceData(surfaceData.albedo, surfaceData.metallic, surfaceData.specular, surfaceData.smoothness, surfaceData.alpha, surfData);
+    surfData.normal = normalWS;
+
+    // Direct light contribution
+    half3 color = LightingFunc(mainLight, surfData, viewDirectionWS);
+
+    // Mix diffuse GI with environment reflections.
+    color += GlobalIllumination(brdfData, bakedGI, surfaceData.occlusion, normalWS, viewDirectionWS);
 
     // Additional lights loop
 #ifdef _ADDITIONAL_LIGHTS

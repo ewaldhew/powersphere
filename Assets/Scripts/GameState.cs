@@ -47,6 +47,19 @@ public class GameState : MonoBehaviour
         return System.Array.IndexOf(objects, obj);
     }
 
+    public PowerSphereState? HeldSphere
+    {
+        get
+        {
+            int index = System.Array.FindIndex(objectStates, (state) => { return state.isHeld; });
+            if (index != -1) {
+                return getPowerSphereState(index);
+            } else {
+                return null;
+            }
+        }
+    }
+
     public PowerSphereState GetColorSphere()
     {
         return getPowerSphereState(colorSphereIndex);

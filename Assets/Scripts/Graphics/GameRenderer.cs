@@ -39,7 +39,7 @@ public class GameRenderer : MonoBehaviour
 
         var colorSphere = gameState.GetColorSphere();
         Vector4 colorSpherePositionAndRadius = Vector4(colorSphere.position, colorSphere.radius);
-        Shader.SetGlobalVector("_ColorSpherePositionAndRadius", Vector4(colorSphere.position, colorSphere.radius));
+        Shader.SetGlobalVector("_ColorSpherePositionAndRadius", colorSpherePositionAndRadius);
 
         var windSphere = gameState.GetWindSphere();
         Vector4 windSpherePositionAndRadius = Vector4(windSphere.position, windSphere.radius);
@@ -49,5 +49,7 @@ public class GameRenderer : MonoBehaviour
         var greenSphere = gameState.GetGreenSphere();
         Vector4 greenSpherePositionAndRadius = Vector4(greenSphere.position, greenSphere.radius);
         Shader.SetGlobalVector("_GreenSpherePositionAndRadius", greenSpherePositionAndRadius);
+
+        Shader.SetGlobalFloat("_WallGlowRadius", gameState.HeldSphere?.radius ?? 3f);
     }
 }

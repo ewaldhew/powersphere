@@ -1,7 +1,6 @@
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
 #undef _NORMALMAP
-#undef _MAIN_LIGHT_SHADOWS
 #include "Include/Lighting.hlsl"
 
 #include "Include/Util.hlsl"
@@ -45,6 +44,9 @@ struct geomOut
     float4 center_WS : POSITION_WS;
     float3 normal_WS : NORMAL;
     float2 uv : TEXCOORD;
+#ifdef _MAIN_LIGHT_SHADOWS
+    float4 shadowCoord : TEXCOORD2;
+#endif
 };
 
 void vert(appdata IN, out vertOut OUT)
@@ -66,6 +68,13 @@ geomOut outputToVertexStream(geomOut base, float3 basePos, float3 offset, float3
     OUT.pos_CS = TransformWorldToHClip(pos.xyz);
     OUT.normal_WS = mul(localNormal_TS, transform);
     OUT.uv = float2(0, offset.x);
+#ifdef _MAIN_LIGHT_SHADOWS
+#if defined(_MAIN_LIGHT_SHADOWS_SCREEN)
+    OUT.shadowCoord = ComputeNormalizedDeviceCoordinatesWithZ(pos_CS);
+#else
+    OUT.shadowCoord = TransformWorldToShadowCoord(pos);
+#endif
+#endif
     return OUT;
 }
 
@@ -160,6 +169,9 @@ half4 frag(geomOut IN, float facing : VFACE) : SV_Target
     lightingInput.positionWSAndFogFactor = float4(IN.pos_WS.xyz, 0); // xyz: positionWS, w: vertex fog factor
     lightingInput.normalWS = IN.normal_WS * sign(facing);
     lightingInput.positionCS = IN.pos_CS;
+#ifdef _MAIN_LIGHT_SHADOWS
+    lightingInput.shadowCoord = IN.shadowCoord;
+#endif
 
     SurfaceInput surfaceInput;
     surfaceInput.albedo = _Color;

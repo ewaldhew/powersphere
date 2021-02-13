@@ -11,6 +11,8 @@ public class GoalTriggerReactor : MonoBehaviour
     string setTriggerName;
     [SerializeField, Tooltip("Activate these particle effects")]
     ParticleSystem[] effects;
+    [SerializeField]
+    AudioClip goalSound;
 
     private Rigidbody targetBody;
     private Animator targetAnimator;
@@ -64,6 +66,8 @@ public class GoalTriggerReactor : MonoBehaviour
             var emissionModule = effect.emission;
             emissionModule.enabled = false;
         }
+
+        AudioSource.PlayClipAtPoint(goalSound, goalTrigger.transform.position, 3);
 
         GameLogicController.PowerSphereGoal.Invoke(new MessageTypes.Goal {
             powerSphere = this.gameObject,

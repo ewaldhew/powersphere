@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-[RequireComponent(typeof(CharacterController), typeof(PlayerInput))]
+[RequireComponent(typeof(CharacterController), typeof(PlayerInput), typeof(AudioSource))]
 public class PlayerController : MonoBehaviour
 {
     [Header("References")]
@@ -13,6 +13,10 @@ public class PlayerController : MonoBehaviour
     PlayerInput playerInput;
     [SerializeField]
     CharacterController baseController;
+    [SerializeField]
+    AudioSource audioSource;
+    [SerializeField]
+    AudioClip hitFloorSound;
 
     [Header("Movement")]
     [SerializeField, Range(0f, 50f),
@@ -85,6 +89,8 @@ public class PlayerController : MonoBehaviour
     {
         // update ground state
         {
+            bool wasOnGround = isOnGround;
+
             isOnGround = false;
             groundNormal = Vector3.up;
 
@@ -103,6 +109,10 @@ public class PlayerController : MonoBehaviour
                 if (isOnGround && hit.distance > baseController.skinWidth) {
                     baseController.Move(hit.distance * Vector3.down);
                 }
+            }
+
+            if (isOnGround && !wasOnGround) {
+                audioSource.PlayOneShot(hitFloorSound, 3);
             }
 
             if (isOnGround) {

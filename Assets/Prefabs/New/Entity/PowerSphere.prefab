@@ -189,6 +189,7 @@ MonoBehaviour:
   setTriggerName: TriggerSphereGoal
   effects:
   - {fileID: 3101071489353157271}
+  goalSound: {fileID: 8300000, guid: f6da671367fedf94ea4ff2dace2a1024, type: 3}
 --- !u!1 &5997605387546162216
 GameObject:
   m_ObjectHideFlags: 0

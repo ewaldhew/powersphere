@@ -1,0 +1,4 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel main
+#define PASS 0
+#include "HLSL/PostProcessCommon.hlsl"

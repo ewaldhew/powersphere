@@ -14,6 +14,21 @@ public static class TextureCreator
         return tex;
     }
 
+    public static Texture2D Perlin(int size)
+    {
+        Texture2D tex = GetTexture2D(size, "PerlinClouds" + TextureIndex++);
+        float step = 1.0f / size;
+        for (int y = 0; y < size; y++) {
+            for (int x = 0; x < size; x++) {
+                Vector2 uv = new Vector2((x + 0.5f) * step, (y + 0.5f) * step);
+                Vector3 samplepos = new Vector3(uv.x - 0.5f, uv.y - 0.5f, 0.0f);
+                tex.SetPixel(x, y, Color.white * (Noise.Eval2D(samplepos.x, samplepos.y) * 0.5f + 0.5f));
+            }
+        }
+        tex.Apply();
+        return tex;
+    }
+
     public static Texture2D PerlinClouds(int size, int seed)
     {
         Texture2D tex = GetTexture2D(size, "PerlinClouds" + TextureIndex++);

@@ -469,6 +469,9 @@ MonoBehaviour:
   - {fileID: 995052662}
   - {fileID: 2101447486}
   - {fileID: 1478721072}
+  heldObjects:
+  - {fileID: 0}
+  - {fileID: 0}
   windScale: 0.02
   windShiftSpeed: 0.02
 --- !u!1001 &394293383

@@ -59,19 +59,33 @@ public class PowerSphereController : MonoBehaviour
 
     public void OnPickup(MessageTypes.Pickup m)
     {
+        // To GoalTriggerReactor on parent
+        rootObject.SendMessage("OnPickup", new MessageTypes.PickupComplete {
+            picker = m.picker,
+            picked = gameObject,
+            slotIndex = m.slotIndex,
+        });
+    }
+
+    public void OnPickupConfirmed(MessageTypes.PickupComplete m) {
         Vector3[] holdOffsets = { Vector3.left, Vector3.right };
         rootObject.transform.SetParent(m.picker.transform);
         rootObject.transform.localPosition = holdOffsets[m.slotIndex];
         rootBody.isKinematic = true;
 
-        rootObject.SendMessage("OnPickup", SendMessageOptions.DontRequireReceiver);
-
-        m.picked = rootObject;
-        GameLogicController.PlayerPick.Invoke(m);
+        GameLogicController.PickupComplete.Invoke(new MessageTypes.PickupComplete {
+            picker = m.picker,
+            picked = rootObject,
+            slotIndex = m.slotIndex,
+        });
     }
 
     public void OnDrop()
     {
+        if (rootObject.transform.parent == null) {
+            return;
+        }
+
         wasDropped = true;
         previousLayer = rootObject.layer;
 
@@ -89,7 +103,7 @@ public class PowerSphereController : MonoBehaviour
 
         rootObject.SendMessage("OnDrop", SendMessageOptions.DontRequireReceiver);
 
-        GameLogicController.PlayerPick.Invoke(new MessageTypes.Pickup {
+        GameLogicController.PickupComplete.Invoke(new MessageTypes.PickupComplete {
             picker = null,
             picked = rootObject,
             slotIndex = -1,

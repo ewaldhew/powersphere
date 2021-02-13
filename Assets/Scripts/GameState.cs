@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public struct PowerSphereState
 {
@@ -26,6 +27,7 @@ public class GameState : MonoBehaviour
 
     public GameObject[] objects;
     public ObjectState[] objectStates;
+    public GameObject[] heldObjects = new GameObject[2];
 
     public float windScale = 0.02f;
     public float windShiftSpeed = 0.02f;
@@ -47,16 +49,17 @@ public class GameState : MonoBehaviour
         return System.Array.IndexOf(objects, obj);
     }
 
-    public PowerSphereState? HeldSphere
+    public PowerSphereState[] HeldSpheres
     {
         get
         {
-            int index = System.Array.FindIndex(objectStates, (state) => { return state.isHeld; });
-            if (index != -1) {
-                return getPowerSphereState(index);
-            } else {
-                return null;
+            var result = new List<PowerSphereState>();
+            for (int i = 0; i < objectStates.Length; i++) {
+                if (objectStates[i].isHeld) {
+                    result.Add(getPowerSphereState(i));
+                }
             }
+            return result.ToArray();
         }
     }
 

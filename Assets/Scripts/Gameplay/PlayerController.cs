@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 [RequireComponent(typeof(CharacterController), typeof(PlayerInput))]
@@ -70,7 +71,6 @@ public class PlayerController : MonoBehaviour
 
     private PlayerCommand pickup1;
     private PlayerCommand pickup2;
-    private GameObject[] heldObjects = new GameObject[2];
 
     // Start is called before the first frame update
     void Start()
@@ -175,39 +175,16 @@ public class PlayerController : MonoBehaviour
 
     private void Pickup(int slotIndex)
     {
-        // drop currently held item, if any
-        if (heldObjects[slotIndex] != null) {
-            heldObjects[slotIndex].SendMessage("OnDrop");
-            heldObjects[slotIndex] = null;
-            return;
-        }
-
         Collider[] items = Physics.OverlapSphere(transform.position, baseController.radius * 2f, pickupLayerMask);
         if (items.Length <= 0) {
             return;
         }
 
-        GameObject target = null;
-        foreach (var item in items) {
-            bool isAlreadyHeld = System.Array.Exists(heldObjects, obj => obj == item.gameObject);
-            if (isAlreadyHeld) {
-                continue;
-            } else {
-                target = item.gameObject;
-                break;
-            }
-        }
-        if (!target) {
-            return;
-        }
-
         var pickupMessage = new MessageTypes.Pickup {
+            candidates = items.Select(item => item.gameObject).ToArray(),
             picker = gameObject,
-            picked = null,
             slotIndex = slotIndex,
         };
-
-        target.SendMessage("OnPickup", pickupMessage);
-        heldObjects[slotIndex] = target;
+        GameLogicController.PlayerPick.Invoke(pickupMessage);
     }
 }

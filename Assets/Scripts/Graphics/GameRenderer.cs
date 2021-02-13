@@ -50,6 +50,7 @@ public class GameRenderer : MonoBehaviour
         Vector4 greenSpherePositionAndRadius = Vector4(greenSphere.position, greenSphere.radius);
         Shader.SetGlobalVector("_GreenSpherePositionAndRadius", greenSpherePositionAndRadius);
 
-        Shader.SetGlobalFloat("_WallGlowRadius", gameState.HeldSphere?.radius ?? 3f);
+        var wallGlowRadius = gameState.HeldSpheres.Length > 0 ? gameState.HeldSpheres[0].radius : 3f;
+        Shader.SetGlobalFloat("_WallGlowRadius", wallGlowRadius);
     }
 }

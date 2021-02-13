@@ -14,6 +14,7 @@ public class GoalTriggerReactor : MonoBehaviour
 
     private Rigidbody targetBody;
     private Animator targetAnimator;
+    private bool animationStarted = false;
     private bool isHeld = false;
 
     void Start()
@@ -22,9 +23,14 @@ public class GoalTriggerReactor : MonoBehaviour
         TryGetComponent(out targetAnimator);
     }
 
-    private void OnPickup()
+    private void OnPickup(MessageTypes.PickupComplete m)
     {
+        if (animationStarted) {
+            return;
+        }
+
         isHeld = true;
+        m.picked.SendMessage("OnPickupConfirmed", m);
     }
     private void OnDrop()
     {
@@ -38,6 +44,7 @@ public class GoalTriggerReactor : MonoBehaviour
         }
 
         // Prepare for animation - disable collision and reset outer rotation
+        animationStarted = true;
         targetBody.isKinematic = true;
         gameObject.transform.position = goalTrigger.transform.position;
         gameObject.transform.rotation = Quaternion.identity;

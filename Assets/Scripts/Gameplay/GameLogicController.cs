@@ -84,7 +84,8 @@ public class GameLogicController : MonoBehaviour
     {
         for (int i = 0; i < gameState.objectStates.Length; i++) {
             ref ObjectState powerSphere = ref gameState.objectStates[i];
-            if (powerSphere.isInGoal && powerSphere.influenceRadius > 0) {
+            bool isInGoal = powerSphere.isInGoal || gameState.debugOverrideAllGoals;
+            if (isInGoal && powerSphere.influenceRadius > 0) {
                 const float targetRadius = 200f;
                 float currentRadius = powerSphere.influenceRadius;
                 float newRadius = currentRadius * 1.1f;
@@ -92,6 +93,8 @@ public class GameLogicController : MonoBehaviour
                     newRadius = -1;
                 }
                 powerSphere.influenceRadius = newRadius;
+            } else if (!isInGoal && powerSphere.influenceRadius < 0) {
+                powerSphere.influenceRadius = gameState.defaultSphereInfluenceRadius;
             }
         }
     }

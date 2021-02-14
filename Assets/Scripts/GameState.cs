@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
 public struct PowerSphereState
 {
     public Vector3 position;
@@ -9,6 +10,7 @@ public struct PowerSphereState
     public bool isInGoal;
 }
 
+[System.Serializable]
 public struct ObjectState
 {
     public bool isHeld;
@@ -29,8 +31,23 @@ public class GameState : MonoBehaviour
     public ObjectState[] objectStates;
     public GameObject[] heldObjects = new GameObject[2];
 
+    [Header("Wind settings")]
+    [Min(0), Tooltip("How much to scale the wind texture. " +
+        "Higher values causes wind direction to vary at greater frequency.")]
     public float windScale = 0.02f;
+    [Min(0), Tooltip("How fast the wind texture scrolls. " +
+        "Higher values creates the impression of more violent wind.")]
     public float windShiftSpeed = 0.02f;
+    [Min(0), Tooltip("How strong the wind is. " +
+        "Higher values increases the amount by which objects are affected by wind.")]
+    public float windStrength = 1f;
+
+    [Header("Default state values")]
+    public float defaultSphereInfluenceRadius = 5f;
+    public float passiveBoundaryGlowRadius = 3f;
+
+    [Header("Debug")]
+    public bool debugOverrideAllGoals = false;
 
     private void OnEnable()
     {
@@ -39,7 +56,7 @@ public class GameState : MonoBehaviour
             objectStates[i] = new ObjectState {
                 isHeld = false,
                 isInGoal = false,
-                influenceRadius = 5f,
+                influenceRadius = defaultSphereInfluenceRadius,
             };
         }
     }
@@ -82,7 +99,7 @@ public class GameState : MonoBehaviour
             position = objectStates[index].isHeld ? player.transform.position : objects[index].transform.position,
             radius = objectStates[index].influenceRadius,
             isHeld = objectStates[index].isHeld,
-            isInGoal = objectStates[index].isInGoal,
+            isInGoal = objectStates[index].isInGoal || debugOverrideAllGoals,
         };
     }
 }

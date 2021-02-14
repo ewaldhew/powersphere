@@ -42,6 +42,7 @@ public class LeafWindParticle : MonoBehaviour
         }
 
         float windSpeed = gameRenderer.windSampler._WindShiftSpeed;
+        float windStrength = gameRenderer.windSampler._WindStrength;
         float effectiveWindResistance = windResistance / windSpeed;
 
         // Update particles according to flow
@@ -75,7 +76,7 @@ public class LeafWindParticle : MonoBehaviour
 
                     // apply updraft
                     if (!isParticleInAir && windFactor > 0 && wind.magnitude > effectiveWindResistance) {
-                        velocity.y += windFactor * velocity.magnitude * facingVector.y;
+                        velocity.y += windStrength * windFactor * velocity.magnitude * facingVector.y;
                     }
 
                     facingVector = Vector3.RotateTowards(facingVector, velocity, 0.01f, 0);

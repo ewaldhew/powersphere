@@ -10,6 +10,7 @@
 #define MAX_NUM_BLADES 5
 #define MAX_NUM_SEGMENTS 4
 
+// instanced props
 float _Radius;
 float _Height;
 float _HeightJitter;
@@ -17,6 +18,7 @@ float _Width;
 float _Lean;
 float4 _Color;
 
+// uniform
 float3 _PlayerPosition;
 float _GrassSquashRadius;
 float _GrassSquashStrength;
@@ -127,7 +129,7 @@ void geom(point vertOut IN[1], inout TriangleStream<geomOut> triStream)
         float windFactor = saturate(abs(dot(wind, bitangent)));
         float3 bendAxis = cross(wind, normal);
         float3x3 windBendMatrix = dot(wind, wind) > 0
-            ? AngleAxis3x3(windFactor * 0.05 * PI, bendAxis)
+            ? AngleAxis3x3(_WindStrength * windFactor * 0.05 * PI, bendAxis)
             : (float3x3)IdentityMatrix;
 
         float3x3 transform = mul(facingMatrix, tangentToWorldMatrix);

@@ -5,6 +5,7 @@
 float4 _BaseColor;
 float _Cutoff;
 
+// uniform
 float _WallGlowRadius;
 float3 _PlayerPosition;
 

@@ -4,6 +4,7 @@ public class WindSampler
 {
     public float _WindFrequency;
     public float _WindShiftSpeed;
+    public float _WindStrength;
     public Texture2D _WindTex;
     public Vector4 _WindSpherePositionAndRadius;
 

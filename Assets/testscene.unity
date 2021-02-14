@@ -469,11 +469,16 @@ MonoBehaviour:
   - {fileID: 995052662}
   - {fileID: 2101447486}
   - {fileID: 1478721072}
+  objectStates: []
   heldObjects:
   - {fileID: 0}
   - {fileID: 0}
   windScale: 0.02
   windShiftSpeed: 0.02
+  windStrength: 1
+  defaultSphereInfluenceRadius: 5
+  passiveBoundaryGlowRadius: 3
+  debugOverrideAllGoals: 0
 --- !u!1001 &394293383
 PrefabInstance:
   m_ObjectHideFlags: 0

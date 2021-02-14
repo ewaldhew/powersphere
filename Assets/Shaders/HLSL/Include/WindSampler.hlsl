@@ -12,6 +12,7 @@ SAMPLER(sampler_WindTex);
 CBUFFER_START(UnityPerMaterial)
     float _WindFrequency;
     float _WindShiftSpeed;
+    float _WindStrength;
     float _AnimTime;
 CBUFFER_END
 

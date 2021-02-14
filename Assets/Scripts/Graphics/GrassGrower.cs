@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public class GrassGrower : MonoBehaviour
@@ -10,11 +8,44 @@ public class GrassGrower : MonoBehaviour
 
     [SerializeField, Range(1, MAX_CLUSTERS),
         Tooltip("Number of grass clusters to generate")]
-    public int grassDensityPerCell = 100;
+    int grassDensityPerCell = 100;
 
     [SerializeField, Min(1),
         Tooltip("Number of subdivisions per axis to use")]
-    public Vector2Int gridSize = Vector2Int.one;
+    Vector2Int gridSize = Vector2Int.one;
+
+    [Header("Geometry options")]
+    [SerializeField,
+        Tooltip("Cluster Radius")]
+    float radius = 1;
+    int radiusPropId = Shader.PropertyToID("_Radius");
+    [SerializeField,
+        Tooltip("Grass Blade Maximum Height")]
+    float height = 1;
+    int heightPropId = Shader.PropertyToID("_Height");
+    [SerializeField,
+        Tooltip("Amount Of Random Height Variation")]
+    float heightJitter = 0.1f;
+    int heightJitterPropId = Shader.PropertyToID("_HeightJitter");
+    [SerializeField,
+        Tooltip("Grass Blade Base Width")]
+    float width = 1;
+    int widthPropId = Shader.PropertyToID("_Width");
+    [SerializeField,
+        Tooltip("Grass Blade Lean Amount")]
+    float lean = 0.4f;
+    int leanPropId = Shader.PropertyToID("_Lean");
+    [SerializeField,
+        Tooltip("Grass Color")]
+    Color grassColor = new Color(0.1f, 1, 0.1f, 1);
+    int grassColorPropId = Shader.PropertyToID("_Color");
+
+    [SerializeField,
+        Tooltip("Reset to material defaults")]
+    bool resetMaterialProps;
+
+    private MeshRenderer meshRenderer;
+    private MaterialPropertyBlock materialProps;
 
     private int prevGrassDensity = 0;
     private Vector2[] halton;
@@ -22,6 +53,10 @@ public class GrassGrower : MonoBehaviour
     private void Start()
     {
         halton = MathUtil.GenerateHalton23(MAX_CLUSTERS * MAX_GRID_CELLS);
+
+        meshRenderer = GetComponent<MeshRenderer>();
+        materialProps = new MaterialPropertyBlock();
+        GetDefaultMaterialProps();
     }
 
     private void Update()
@@ -69,6 +104,32 @@ public class GrassGrower : MonoBehaviour
         mesh.RecalculateBounds(); // XXX: Does not account for grass height!
 
         prevGrassDensity = grassDensity;
+    }
+
+    private void LateUpdate()
+    {
+        if (resetMaterialProps) {
+            GetDefaultMaterialProps();
+            resetMaterialProps = false;
+        }
+
+        materialProps.SetFloat(radiusPropId, radius);
+        materialProps.SetFloat(heightPropId, height);
+        materialProps.SetFloat(heightJitterPropId, heightJitter);
+        materialProps.SetFloat(widthPropId, width);
+        materialProps.SetFloat(leanPropId, lean);
+        materialProps.SetColor(grassColorPropId, grassColor);
+        meshRenderer.SetPropertyBlock(materialProps);
+    }
+
+    private void GetDefaultMaterialProps()
+    {
+        radius = meshRenderer.material.GetFloat(radiusPropId);
+        height = meshRenderer.material.GetFloat(heightPropId);
+        heightJitter = meshRenderer.material.GetFloat(heightJitterPropId);
+        width = meshRenderer.material.GetFloat(widthPropId);
+        lean = meshRenderer.material.GetFloat(leanPropId);
+        grassColor = meshRenderer.material.GetColor(grassColorPropId);
     }
 
     private void OnDrawGizmos()

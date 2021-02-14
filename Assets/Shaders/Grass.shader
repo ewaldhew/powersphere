@@ -2,8 +2,8 @@
 {
     Properties
     {
-        [MainColor] _BaseColor("Color", Color) = (0.5,0.5,0.5,1)
-        [MainTexture] _BaseMap("Albedo", 2D) = "white" {}
+        [HideInInspector] [MainColor] _BaseColor("Color", Color) = (0.5,0.5,0.5,1)
+        [HideInInspector] [MainTexture] _BaseMap("Albedo", 2D) = "white" {}
 
         _Radius("Cluster Radius", Float) = 1
         _Height("Grass Blade Maximum Height", Float) = 1

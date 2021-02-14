@@ -190,6 +190,7 @@ namespace UnityEngine.Rendering.Universal
             if (current == null || current.width != width || current.height != height) {
                 current?.Release();
                 current = new RenderTexture(width, height, 1, RenderTextureFormat.ARGBFloat, isLinearSpace ? RenderTextureReadWrite.Linear : RenderTextureReadWrite.sRGB);
+                current.name = "PostProcessOUTPUT";
                 current.enableRandomWrite = enableRandomWrite;
                 current.Create();
             }
@@ -204,13 +205,6 @@ namespace UnityEngine.Rendering.Universal
 
             if (source == destination && sourceId != -1)
                 cmd.ReleaseTemporaryRT(sourceId);
-
-            for (int i = 0; i < gOutput.Length; i++) {
-                if (gOutput[i] != null) {
-                    gOutput[i].Release();
-                    gOutput[i] = null;
-                }
-            }
         }
     }
 }

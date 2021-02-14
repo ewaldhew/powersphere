@@ -449,6 +449,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gameState: {fileID: 376207984}
+  postProcessRendererFeature: {fileID: 2103518483786059626, guid: 272bf3f07d730544883f7de809ef70f4,
+    type: 2}
+  postProcessingEnabled: 0
 --- !u!114 &376207984
 MonoBehaviour:
   m_ObjectHideFlags: 0

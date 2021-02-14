@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 using static VectorUtil;
 
@@ -8,6 +9,11 @@ public class GameRenderer : MonoBehaviour
 {
     [SerializeField]
     GameState gameState;
+
+    [SerializeField]
+    PostProcess postProcessRendererFeature;
+    [SerializeField]
+    bool postProcessingEnabled;
 
     public WindSampler windSampler { get; private set; }
 
@@ -54,5 +60,7 @@ public class GameRenderer : MonoBehaviour
 
         var wallGlowRadius = gameState.HeldSpheres.Length > 0 ? gameState.HeldSpheres[0].radius : gameState.passiveBoundaryGlowRadius;
         Shader.SetGlobalFloat("_WallGlowRadius", wallGlowRadius);
+
+        postProcessRendererFeature.settings.postProcessing = postProcessingEnabled;
     }
 }

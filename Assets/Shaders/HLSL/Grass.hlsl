@@ -17,6 +17,8 @@ float _HeightJitter;
 float _Width;
 float _Lean;
 float4 _Color;
+TEXTURE2D(_GrowthMask);
+SAMPLER(sampler_GrowthMask);
 
 // uniform
 float3 _PlayerPosition;
@@ -29,6 +31,7 @@ struct appdata
     float4 pos_OS : POSITION;
     float3 normal_OS : NORMAL;
     float4 tangent_OS : TANGENT;
+    float2 uv : TEXCOORD0;
 };
 
 struct vertOut
@@ -37,13 +40,13 @@ struct vertOut
     float3 normal_WS : NORMAL;
     float3 tangent_WS : TANGENT;
     float3 bitangent_WS : TANGENT1;
+    float2 uv : TEXCOORD0;
 };
 
 struct geomOut
 {
     float4 pos_CS : SV_POSITION;
     float4 pos_WS : TEXCOORD1;
-    float4 center_WS : POSITION_WS;
     float3 normal_WS : NORMAL;
     float2 uv : TEXCOORD;
 #ifdef _MAIN_LIGHT_SHADOWS
@@ -59,6 +62,7 @@ void vert(appdata IN, out vertOut OUT)
     OUT.normal_WS = tbn.normalWS;
     OUT.tangent_WS = tbn.tangentWS;
     OUT.bitangent_WS = tbn.bitangentWS;
+    OUT.uv = IN.uv;
 }
 
 geomOut outputToVertexStream(geomOut base, float3 basePos, float3 offset, float3 prevOffset, float3x3 transform)
@@ -100,22 +104,26 @@ void geom(point vertOut IN[1], inout TriangleStream<geomOut> triStream)
     );
 
     geomOut OUT;
-    OUT.center_WS = pos_WS;
 
     // calculate LOD factor
-    float distanceFromCamera = distance(GetCameraPositionWS(), pos_WS);
+    float distanceFromCamera = distance(GetCameraPositionWS(), pos_WS.xyz);
     float lodFactor1 = 1.0f - saturate((distanceFromCamera - _GrassLOD.x) / _GrassLOD.y);
     float lodFactor2 = 1.0f - saturate((distanceFromCamera - _GrassLOD.z) / _GrassLOD.w);
+
+    float growthFactor = smoothstep(0.3, 0.5, SAMPLE_TEXTURE2D_LOD(_GrowthMask, sampler_GrowthMask, IN[0].uv, 0).x);
+    if (growthFactor <= 0) {
+        return;
+    }
 
     const int numBlades = max(1, ceil(lodFactor1 * MAX_NUM_BLADES));
     const int numSegments = max(1, ceil(lodFactor2 * MAX_NUM_SEGMENTS));
 
-    [unroll]
     for (int blade = 0; blade < numBlades; blade++) {
         float r = blade / (float)numBlades * TWO_PI;
         float sinr, cosr;
         sincos(r, sinr, cosr);
-        float3 bladeBasePos = pos_WS.xyz + (tangent * -sinr + bitangent * cosr) * _Radius;
+        float clusterRadius = max(0.001f, growthFactor * _Radius);
+        float3 bladeBasePos = pos_WS.xyz + (tangent * -sinr + bitangent * cosr) * clusterRadius;
 
         float distanceFromSquasher = distance(_PlayerPosition.xz, bladeBasePos.xz);
         float squashFactor = 1.0f - saturate(distanceFromSquasher / _GrassSquashRadius); // Can sample from texture also
@@ -137,6 +145,10 @@ void geom(point vertOut IN[1], inout TriangleStream<geomOut> triStream)
         float bladeLean = _Lean;
         float bladeHeight = _Height + (rand(bladeBasePos) * 2.0f - 1.0f) * _HeightJitter;
         float bladeWidth = _Width;
+
+        bladeLean *= max(0.3, growthFactor);
+        bladeHeight *= max(0.3, growthFactor);
+        bladeWidth *= max(0.3, growthFactor);
 
         float3 prevOffset = float3(0, 0, -1);
         [unroll]
@@ -176,7 +188,7 @@ half4 frag(geomOut IN, float facing : VFACE) : SV_Target
 #endif
 
     SurfaceInput surfaceInput;
-    surfaceInput.albedo = _Color;
+    surfaceInput.albedo = _Color.rgb;
     surfaceInput.specular = 0;
     surfaceInput.metallic = 0;
     surfaceInput.smoothness = 1;

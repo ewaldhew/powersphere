@@ -14,15 +14,15 @@ public static class TextureCreator
         return tex;
     }
 
-    public static Texture2D Perlin(int size)
+    public static Texture2D Perlin(int size, float offsetX = 0, float offsetY = 0, int frequency = 1)
     {
         Texture2D tex = GetTexture2D(size, "PerlinClouds" + TextureIndex++);
         float step = 1.0f / size;
         for (int y = 0; y < size; y++) {
             for (int x = 0; x < size; x++) {
-                Vector2 uv = new Vector2((x + 0.5f) * step, (y + 0.5f) * step);
+                Vector2 uv = new Vector2((x + offsetX + 0.5f) * step, (y + offsetY + 0.5f) * step);
                 Vector3 samplepos = new Vector3(uv.x - 0.5f, uv.y - 0.5f, 0.0f);
-                tex.SetPixel(x, y, Color.white * (Noise.Eval2D(samplepos.x, samplepos.y) * 0.5f + 0.5f));
+                tex.SetPixel(x, y, Color.white * (Noise.Eval2DFrac(samplepos.x, samplepos.y, frequency, 1) * 0.5f + 0.5f));
             }
         }
         tex.Apply();
@@ -36,7 +36,7 @@ public static class TextureCreator
         for (int y = 0; y < size; y++) {
             for (int x = 0; x < size; x++) {
                 Vector2 uv = new Vector2((x + 0.5f) * step, (y + 0.5f) * step);
-                Vector3 samplepos = new Vector3(uv.x - 0.5f, seed*uv.x + uv.y - 0.5f, 0.0f);
+                Vector3 samplepos = new Vector3(uv.x - 0.5f, seed + uv.y - 0.5f, 0.0f);
                 tex.SetPixel(x, y, Color.white * (Noise.Eval2DFrac(samplepos.x, samplepos.y, 10, 4) * 0.5f + 0.5f));
             }
         }

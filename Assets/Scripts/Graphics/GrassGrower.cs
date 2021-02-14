@@ -14,6 +14,12 @@ public class GrassGrower : MonoBehaviour
         Tooltip("Number of subdivisions per axis to use")]
     Vector2Int gridSize = Vector2Int.one;
 
+    [SerializeField]
+    private Texture2D grassGrowthMask;
+    int grassGrowthMaskPropId = Shader.PropertyToID("_GrowthMask");
+    [SerializeField]
+    bool generateGrassGrowthMask;
+
     [Header("Geometry options")]
     [SerializeField,
         Tooltip("Cluster Radius")]
@@ -57,6 +63,10 @@ public class GrassGrower : MonoBehaviour
         meshRenderer = GetComponent<MeshRenderer>();
         materialProps = new MaterialPropertyBlock();
         GetDefaultMaterialProps();
+
+        if (grassGrowthMask == null && generateGrassGrowthMask) {
+            grassGrowthMask = TextureCreator.Perlin(256, 1337.0f, 37.0f, 1);
+        }
     }
 
     private void Update()
@@ -119,6 +129,7 @@ public class GrassGrower : MonoBehaviour
         materialProps.SetFloat(widthPropId, width);
         materialProps.SetFloat(leanPropId, lean);
         materialProps.SetColor(grassColorPropId, grassColor);
+        if (grassGrowthMask) { materialProps.SetTexture(grassGrowthMaskPropId, grassGrowthMask); }
         meshRenderer.SetPropertyBlock(materialProps);
     }
 

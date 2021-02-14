@@ -11,6 +11,8 @@
         _Width("Grass Blade Base Width", Float) = 1
         _Lean("Grass Blade Lean Amount", Float) = 0.4
         _Color("Grass Color", Color) = (0.1, 1, 0.1, 1)
+
+        _GrowthMask("Growth Mask", 2D) = "white" {}
     }
 
     SubShader

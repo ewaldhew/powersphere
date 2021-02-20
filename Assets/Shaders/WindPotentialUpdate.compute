@@ -1,0 +1,69 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+cbuffer UniformParams
+{
+    float2 positionChange;
+    uint2 texSize;
+    float2 worldToTexScale;
+    float _DynamicWindRadius;
+};
+
+#if CURL_WIND
+Texture2D<float> PreviousResult;
+SamplerState samplerPreviousResult;
+
+RWTexture2D<float> Result;
+
+float unpack(float x)
+{
+    return x * 2 - 1;
+}
+float pack(float x)
+{
+    return x * 0.5 + 0.5;
+}
+#else
+Texture2D<float4> PreviousResult;
+SamplerState samplerPreviousResult;
+
+RWTexture2D<float4> Result;
+#endif
+
+[numthreads(8,8,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    float2 pixelCoord = id.xy + 0.5f;
+    float2 uv = (pixelCoord + positionChange) / texSize;
+
+    const uint tx = texSize.x >> 1;
+    const uint ty = texSize.y >> 1;
+    float2 center = float2(tx, ty) + 0.5f;
+
+#if CURL_WIND
+    float currentValue = unpack(PreviousResult.SampleLevel(samplerPreviousResult, uv, 0));
+
+    // apply decay
+    currentValue = currentValue * 0.98 - 0.02;
+
+    float2 d = (pixelCoord - center);
+    float sqrDist = dot(d, d);
+    float value = sqrDist > 0 ? (determinant(float2x2(positionChange, d))) / sqrDist * 0.1f : 0;
+
+    float newValue = currentValue + value;
+    Result[id.xy] = pack(clamp(newValue, -1, 1));
+#else
+    float4 packed = PreviousResult.SampleLevel(samplerPreviousResult, uv, 0);
+    float2 displacement = packed.xy;
+
+    // shift towards player movement
+    const float radius = _DynamicWindRadius * max(worldToTexScale.x, worldToTexScale.y);
+    float2 d = pixelCoord - center;
+    float distFromCenter = length(d);
+    float factor = 1.0f - saturate(distFromCenter / radius);
+    bool hadMoved = dot(positionChange, positionChange) > dot(displacement, displacement);
+    displacement = lerp(displacement, positionChange, factor * hadMoved);
+
+    Result[id.xy] = float4(displacement * 0.8f, 0, 0);
+#endif
+}

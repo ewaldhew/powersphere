@@ -133,11 +133,12 @@ void geom(point vertOut IN[1], inout TriangleStream<geomOut> triStream)
         float3x3 facingMatrix = AngleAxis3x3(rand(bladeBasePos.zxy) * TWO_PI, float3(0, 0, 1));
 
         float3 wind = WindVelocity(bladeBasePos);
-        wind = normalize(wind);
+        float windAmount = length(wind);
+        wind = SafeNormalize(wind);
         float windFactor = saturate(abs(dot(wind, bitangent)));
         float3 bendAxis = cross(wind, normal);
         float3x3 windBendMatrix = dot(wind, wind) > 0
-            ? AngleAxis3x3(_WindStrength * windFactor * 0.05 * PI, bendAxis)
+            ? AngleAxis3x3(clamp(_WindStrength * windAmount * windFactor * 0.05, 0, HALF_PI * 0.6), bendAxis)
             : (float3x3)IdentityMatrix;
 
         float3x3 transform = mul(facingMatrix, tangentToWorldMatrix);

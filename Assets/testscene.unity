@@ -401,6 +401,7 @@ GameObject:
   - component: {fileID: 376207982}
   - component: {fileID: 376207981}
   - component: {fileID: 376207983}
+  - component: {fileID: 376207985}
   - component: {fileID: 376207984}
   m_Layer: 0
   m_Name: AppController
@@ -452,6 +453,7 @@ MonoBehaviour:
   postProcessRendererFeature: {fileID: 2103518483786059626, guid: 272bf3f07d730544883f7de809ef70f4,
     type: 2}
   postProcessingEnabled: 0
+  windBuffer: {fileID: 376207985}
 --- !u!114 &376207984
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -479,9 +481,26 @@ MonoBehaviour:
   windScale: 0.02
   windShiftSpeed: 0.02
   windStrength: 1
+  dynamicWindStrength: 20
+  dynamicWindRadius: 1
   defaultSphereInfluenceRadius: 5
   passiveBoundaryGlowRadius: 3
   debugOverrideAllGoals: 0
+--- !u!114 &376207985
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 376207980}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a5a62a2f89dba941b0e7f68ff053bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gameState: {fileID: 376207984}
+  range: 16
+  windPotentialUpdate: {fileID: 7200000, guid: 27b70f4e837258942a650075026f59a8, type: 3}
 --- !u!1001 &394293383
 PrefabInstance:
   m_ObjectHideFlags: 0

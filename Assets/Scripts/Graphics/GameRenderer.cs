@@ -15,6 +15,8 @@ public class GameRenderer : MonoBehaviour
     [SerializeField]
     bool postProcessingEnabled;
 
+    [SerializeField]
+    WindBuffer windBuffer;
     public WindSampler windSampler { get; private set; }
 
     void OnEnable()
@@ -38,6 +40,16 @@ public class GameRenderer : MonoBehaviour
         windSampler._WindFrequency = gameState.windScale;
         windSampler._WindShiftSpeed = gameState.windShiftSpeed;
         windSampler._WindStrength = gameState.windStrength;
+
+        Shader.SetGlobalTexture("_WindBuffer", windBuffer.WindPotential);
+        Shader.SetGlobalVector("_WindBufferCenter", windBuffer.CenterPosition);
+        Shader.SetGlobalFloat("_WindBufferRange", windBuffer.Range);
+        Shader.SetGlobalFloat("_DynamicWindStrength", gameState.dynamicWindStrength);
+        windSampler._WindBuffer = windBuffer.WindPotential;
+        windSampler._WindBufferCenter = windBuffer.CenterPosition;
+        windSampler._WindBufferRange = windBuffer.Range;
+        windSampler._DynamicWindStrength = gameState.dynamicWindStrength;
+        windSampler._DynamicWindRadius = gameState.dynamicWindRadius;
 
         Vector3 playerPosition = gameState.player.transform.position;
         Shader.SetGlobalVector("_PlayerPosition", playerPosition);

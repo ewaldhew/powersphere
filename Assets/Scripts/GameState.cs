@@ -41,6 +41,12 @@ public class GameState : MonoBehaviour
     [Min(0), Tooltip("How strong the wind is. " +
         "Higher values increases the amount by which objects are affected by wind.")]
     public float windStrength = 1f;
+    [Min(0), Tooltip("How strong the dynamic wind is. " +
+        "Higher values increases the amount by which objects are affected by wind" +
+        "from player interaction.")]
+    public float dynamicWindStrength = 20f;
+    [Min(0), Tooltip("How large the radius of player wind influence is.")]
+    public float dynamicWindRadius = 1f;
 
     [Header("Default state values")]
     public float defaultSphereInfluenceRadius = 5f;

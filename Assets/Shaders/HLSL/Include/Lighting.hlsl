@@ -42,7 +42,7 @@ struct SurfaceBRDFParams
     half3 albedo;
     half3 diffuseColor;
     half3 specular;
-    half3 smoothness;
+    half smoothness;
     half reflectivity;
     half3 normal;
 };

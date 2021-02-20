@@ -303,6 +303,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameState: {fileID: 0}
   windAudioSource: {fileID: 8968796993119868303}
+  leavesAudioSource: {fileID: 0}
+  leavesSoundPalette: []
 --- !u!81 &2231101392678358170
 AudioListener:
   m_ObjectHideFlags: 0

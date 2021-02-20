@@ -2,20 +2,25 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(Renderer))]
+[RequireComponent(typeof(MeshRenderer))]
 public class VectorDebug : MonoBehaviour
 {
     [SerializeField]
     Vector3 step = new Vector3(1, 1, 1);
 
     Bounds sampleArea;
+    MeshRenderer meshRenderer;
     GameRenderer gameRenderer;
 
-    // Start is called before the first frame update
-    void Start()
+    private void OnEnable()
     {
-        sampleArea = GetComponent<Renderer>().bounds;
+        meshRenderer = GetComponent<MeshRenderer>();
         gameRenderer = FindObjectOfType<GameRenderer>();
+    }
+
+    private void Update()
+    {
+        sampleArea = meshRenderer.bounds;
     }
 
     private void OnDrawGizmos()
@@ -25,8 +30,8 @@ public class VectorDebug : MonoBehaviour
                 for (float z = sampleArea.min.z; z < sampleArea.max.z; z += step.z) {
                     Vector3 position = new Vector3(x, y, z);
                     Vector3 wind = gameRenderer.windSampler.WindVelocity(position);
-                    Vector3 end = position + wind.normalized;
-                    Gizmos.color = Color.gray;
+                    Vector3 end = position + Vector3.ClampMagnitude(wind, 1);
+                    Gizmos.color = wind.magnitude * 0.1f * Color.white;
                     Gizmos.DrawSphere(position, 0.05f);
                     Gizmos.color = Color.red;
                     Gizmos.DrawLine(position, end);

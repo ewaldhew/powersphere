@@ -16,7 +16,7 @@ TagManager:
   - GameMovableEntity
   - PowerSpheres
   - Player
-  - 
+  - PostProcessMask
   - 
   - 
   - 

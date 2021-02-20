@@ -22,6 +22,8 @@ namespace UnityEngine.Rendering.Universal
             var sourceTextureIdProperty = property.FindPropertyRelative("sourceTextureId");
             var destinationTextureIdProperty = property.FindPropertyRelative("destinationTextureId");
 
+            var maskedCopyMatlProperty = property.FindPropertyRelative("maskedCopyMatl");
+
             var postProcessShaderHProperty = property.FindPropertyRelative("postProcessShaderH");
             var postProcessShaderVProperty = property.FindPropertyRelative("postProcessShaderV");
 
@@ -45,6 +47,11 @@ namespace UnityEngine.Rendering.Universal
 
             if (selectedDestinationType != BufferType.CameraColor)
                 EditorGUILayout.PropertyField(destinationTextureIdProperty);
+
+            EditorGUI.BeginChangeCheck();
+            Material mat = EditorGUILayout.ObjectField("Mask Material", maskedCopyMatlProperty.objectReferenceValue, typeof(Material), allowSceneObjects: false) as Material;
+            if (EditorGUI.EndChangeCheck())
+                maskedCopyMatlProperty.objectReferenceValue = mat;
 
             EditorGUI.BeginChangeCheck();
             ComputeShader shaderH = EditorGUILayout.ObjectField("Compute Shader H", postProcessShaderHProperty.objectReferenceValue, typeof(ComputeShader), allowSceneObjects: false) as ComputeShader;

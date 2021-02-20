@@ -22,6 +22,8 @@ namespace UnityEngine.Rendering.Universal
             public string sourceTextureId = "_SourceTexture";
             public string destinationTextureId = "_DestinationTexture";
 
+            public Material maskedCopyMatl;
+
             public ComputeShader postProcessShaderH = null;
             public ComputeShader postProcessShaderV = null;
 
@@ -81,6 +83,7 @@ namespace UnityEngine.Rendering.Universal
         private int outputUavSlot;
 
         // shader resources
+        int tempColorId;
         private RenderTargetIdentifier depthTex;
         private RenderTexture[] gOutput = new RenderTexture[2];
         private Texture2D noiseTex = TextureCreator.PerlinClouds(512, 0);
@@ -179,7 +182,25 @@ namespace UnityEngine.Rendering.Universal
                 cmd.DispatchCompute(settings.postProcessShaderV, watercolorVKernelIndex, width, MathUtil.DivideByMultiple(height, DispatchGroupWidth), 1);
             }
 
-            Blit(cmd, gOutput[1], source);
+            // This does not work!
+            //cmd.SetGlobalTexture("_SourceTex", gOutput[1]);
+            //cmd.SetRenderTarget(source, depthTex);
+            // For some reason the DSV is not bound here
+            //cmd.Blit(gOutput[1], source, settings.maskedCopyMatl);
+
+            // Instead, we have to do this...
+            // Credits to https://forum.unity.com/threads/841150/ for figuring this out
+            cmd.GetTemporaryRT(tempColorId, blitTargetDescriptor, filterMode);
+            var tempColor = new RenderTargetIdentifier(tempColorId);
+
+            cmd.Blit(gOutput[1], tempColor);
+            cmd.SetGlobalTexture("_SourceTex", tempColor);
+            cmd.SetRenderTarget(source, depthTex);
+
+            cmd.SetViewProjectionMatrices(Matrix4x4.identity, Matrix4x4.identity);
+            cmd.DrawMesh(RenderingUtils.fullscreenMesh, Matrix4x4.identity, settings.maskedCopyMatl);
+            Camera camera = renderingData.cameraData.camera;
+            cmd.SetViewProjectionMatrices(camera.worldToCameraMatrix, camera.projectionMatrix);
 
             context.ExecuteCommandBuffer(cmd);
             CommandBufferPool.Release(cmd);
@@ -205,6 +226,8 @@ namespace UnityEngine.Rendering.Universal
 
             if (source == destination && sourceId != -1)
                 cmd.ReleaseTemporaryRT(sourceId);
+
+            cmd.ReleaseTemporaryRT(tempColorId);
         }
     }
 }

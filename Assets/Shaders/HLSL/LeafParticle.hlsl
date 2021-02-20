@@ -11,7 +11,7 @@ struct AttributesParticle
     float4 color : COLOR;
     float4 uvAndVelocityXY : TEXCOORD0;
     float4 velocityZAndCenter : TEXCOORD1;
-    float particleSize : TEXCOORD2;
+    float4 particleSizeAndFacing : TEXCOORD2;
 };
 
 struct VaryingsParticle
@@ -71,15 +71,22 @@ VaryingsParticle ParticlesLitVertex(AttributesParticle input)
 
     // transform by velocity
     #define EPSILON 0.01f
-    float radius = input.particleSize / 2;
+    float radius = input.particleSizeAndFacing.x / 2;
+    float3 facingVec = input.particleSizeAndFacing.yzw;
     float3 velocityVec = float3(input.uvAndVelocityXY.zw, input.velocityZAndCenter.x);
     float3 center = input.velocityZAndCenter.yzw;
-    velocityVec = length(velocityVec) > 0 ? normalize(velocityVec) : float3(0, 1, 0);
-    velocityVec = (center.y < radius + EPSILON) ? float3(0, 1, 0) : velocityVec;
-    float3 localVertex = input.vertex.xyz - center;
+
+    float3 facing = normalize(float3(facingVec.x, facingVec.y, 0));
+    float3x3 rotateMatrix = RotateTowards(float3(1, 0, 0), facing);
+
+    velocityVec = (center.y > radius + EPSILON) && length(velocityVec) > 0 ? normalize(velocityVec) : float3(0, 1, 0);
+    velocityVec *= sign(velocityVec.y);
     float3x3 objectToVelocityMatrix = RotateTowards(float3(0, 0, 1), velocityVec);
-    localVertex = mul(objectToVelocityMatrix, localVertex);
-    float3 inputVertex = localVertex + center - radius + EPSILON;
+
+    float3 localVertex = input.vertex.xyz - center;
+    localVertex = mul(objectToVelocityMatrix, mul(rotateMatrix, localVertex));
+    float3 inputVertex = localVertex + center;
+    inputVertex.y -= radius - EPSILON;
 
     float3 normalWS = velocityVec;
 

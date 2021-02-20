@@ -2570,41 +2570,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 8994574307569760417, guid: d5ba0531ca52fe94f9ee0ef8b0d5e295,
-        type: 3}
-      propertyPath: m_VertexStreams.Array.size
-      value: 7
-      objectReference: {fileID: 0}
-    - target: {fileID: 8994574307569760417, guid: d5ba0531ca52fe94f9ee0ef8b0d5e295,
-        type: 3}
-      propertyPath: m_VertexStreams.Array.data[2]
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 8994574307569760417, guid: d5ba0531ca52fe94f9ee0ef8b0d5e295,
-        type: 3}
-      propertyPath: m_VertexStreams.Array.data[3]
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 8994574307569760417, guid: d5ba0531ca52fe94f9ee0ef8b0d5e295,
-        type: 3}
-      propertyPath: m_VertexStreams.Array.data[4]
-      value: 19
-      objectReference: {fileID: 0}
-    - target: {fileID: 8994574307569760417, guid: d5ba0531ca52fe94f9ee0ef8b0d5e295,
-        type: 3}
-      propertyPath: m_VertexStreams.Array.data[5]
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 8994574307569760417, guid: d5ba0531ca52fe94f9ee0ef8b0d5e295,
-        type: 3}
-      propertyPath: m_VertexStreams.Array.data[6]
-      value: 12
-      objectReference: {fileID: 0}
-    - target: {fileID: 8994574307569760417, guid: d5ba0531ca52fe94f9ee0ef8b0d5e295,
-        type: 3}
-      propertyPath: m_VertexStreams.Array.data[7]
-      value: 12
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d5ba0531ca52fe94f9ee0ef8b0d5e295, type: 3}
 --- !u!1001 &4310951229171492196

@@ -120,23 +120,6 @@ Transform:
   m_Father: {fileID: 8982444886067334277}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2116177371
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8592808227476262975}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c06469761b5f9e645babca130a608dbe, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  gameRenderer: {fileID: 0}
-  particleSystem: {fileID: 228285067208111114}
-  windResistance: 0.02
-  maxAfloat: 10
-  debugViewVelocity: 0
 --- !u!82 &4635191720866088836
 AudioSource:
   m_ObjectHideFlags: 0
@@ -251,6 +234,23 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &2116177371
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8592808227476262975}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c06469761b5f9e645babca130a608dbe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gameRenderer: {fileID: 0}
+  particleSystem: {fileID: 228285067208111114}
+  windResistance: 0.02
+  maxAfloat: 10
+  debugViewVelocity: 0
 --- !u!1001 &8875454262850693875
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -356,7 +356,7 @@ PrefabInstance:
     - target: {fileID: 574445406847357522, guid: 4ab902a5c5ab4e442871926217bb9248,
         type: 3}
       propertyPath: m_VertexStreams.Array.size
-      value: 6
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 574445406847357522, guid: 4ab902a5c5ab4e442871926217bb9248,
         type: 3}
@@ -366,27 +366,32 @@ PrefabInstance:
     - target: {fileID: 574445406847357522, guid: 4ab902a5c5ab4e442871926217bb9248,
         type: 3}
       propertyPath: m_VertexStreams.Array.data[2]
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 574445406847357522, guid: 4ab902a5c5ab4e442871926217bb9248,
-        type: 3}
-      propertyPath: m_VertexStreams.Array.data[3]
       value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 574445406847357522, guid: 4ab902a5c5ab4e442871926217bb9248,
         type: 3}
-      propertyPath: m_VertexStreams.Array.data[4]
+      propertyPath: m_VertexStreams.Array.data[3]
       value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 574445406847357522, guid: 4ab902a5c5ab4e442871926217bb9248,
         type: 3}
-      propertyPath: m_VertexStreams.Array.data[5]
+      propertyPath: m_VertexStreams.Array.data[4]
       value: 19
       objectReference: {fileID: 0}
     - target: {fileID: 574445406847357522, guid: 4ab902a5c5ab4e442871926217bb9248,
         type: 3}
+      propertyPath: m_VertexStreams.Array.data[5]
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 574445406847357522, guid: 4ab902a5c5ab4e442871926217bb9248,
+        type: 3}
       propertyPath: m_VertexStreams.Array.data[6]
-      value: 20
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 574445406847357522, guid: 4ab902a5c5ab4e442871926217bb9248,
+        type: 3}
+      propertyPath: m_VertexStreams.Array.data[7]
+      value: 33
       objectReference: {fileID: 0}
     - target: {fileID: 870385700379818700, guid: 4ab902a5c5ab4e442871926217bb9248,
         type: 3}

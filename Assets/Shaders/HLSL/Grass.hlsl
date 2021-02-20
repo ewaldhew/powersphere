@@ -78,7 +78,7 @@ geomOut outputToVertexStream(geomOut base, float3 basePos, float3 offset, float3
 #if defined(_MAIN_LIGHT_SHADOWS_SCREEN)
     OUT.shadowCoord = ComputeNormalizedDeviceCoordinatesWithZ(pos_CS);
 #else
-    OUT.shadowCoord = TransformWorldToShadowCoord(pos);
+    OUT.shadowCoord = TransformWorldToShadowCoord(pos.xyz);
 #endif
 #endif
     return OUT;

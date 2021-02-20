@@ -86,6 +86,8 @@ VaryingsParticle ParticlesLitVertex(AttributesParticle input)
     VertexPositionInputs vertexInput = GetVertexPositionInputs(inputVertex.xyz);
     half3 viewDirWS = GetCameraPositionWS() - vertexInput.positionWS;
 
+    normalWS *= sign(dot(viewDirWS, normalWS));
+
 #if !SHADER_HINT_NICE_QUALITY
     viewDirWS = SafeNormalize(viewDirWS);
 #endif
@@ -120,7 +122,7 @@ half4 ParticlesLitFragment(VaryingsParticle input) : SV_Target
     SurfaceData surfaceData;
     InitializeParticleLitSurfaceData(input.texcoord, blendUv, input.color, 0, surfaceData);
 
-    ColorSphereInfluence colorSphereInfluence = getColorSphereInfluence(surfaceData.albedo, input.positionWS, _ColorSpherePositionAndRadius);
+    ColorSphereInfluence colorSphereInfluence = getColorSphereInfluence(surfaceData.albedo, input.positionWS.xyz, _ColorSpherePositionAndRadius);
     surfaceData.albedo = lerp(surfaceData.albedo, colorSphereInfluence.albedoSwap, _ColorSpherePositionAndRadius.w > 0);
     surfaceData.emission = colorSphereInfluence.base.boundaryColor;
 

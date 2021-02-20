@@ -83,6 +83,21 @@ public class LeafWindParticle : MonoBehaviour
                 }
             }
 
+            // kick up leaves when moving
+            float distanceFromCenter = Vector3.Distance(gameRenderer.windSampler._WindBufferCenter, particles[i].position);
+            float windRadius = 2 * gameRenderer.windSampler._DynamicWindRadius;
+            float minWind = 0.2f * gameRenderer.windSampler._DynamicWindStrength * effectiveWindResistance;
+            if (!isParticleInAir && distanceFromCenter < windRadius && wind.magnitude > minWind) {
+                const float threshold = 0.8f;
+                if (counter < threshold) {
+                    float windFactor = Vector3.Dot(wind, facingVector);
+                    velocity.x += windFactor * wind.magnitude * facingVector.x;
+                    velocity.y += wind.magnitude * 5;
+                    velocity.z += windFactor * wind.magnitude * facingVector.z;
+                }
+                counter = threshold + (1 - threshold) * Random.value * Mathf.SmoothStep(0, 1, distanceFromCenter / windRadius);
+            }
+
             if (isParticleInAir) {
                 // follow wind direction
                 velocity = Vector3.MoveTowards(velocity, wind, windSpeed * Time.deltaTime);

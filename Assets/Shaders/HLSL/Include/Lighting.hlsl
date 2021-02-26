@@ -69,17 +69,17 @@ void CollectSurfaceData(half3 albedo, half metallic, half3 specular, half smooth
     brdfParams.smoothness = smoothness;
 }
 
-half3 LightingFunc(Light light, SurfaceBRDFParams brdfParams, half3 viewDir)
+half3 LambertianDiffuse(Light light, SurfaceBRDFParams brdfParams, half3 viewDir)
 {
-    // lambertian diffuse
-
     float LdotN = saturate(dot(light.direction, brdfParams.normal));
 
     half3 lightColor = light.shadowAttenuation * light.distanceAttenuation * light.color;
     half3 lambertianColor = LdotN * brdfParams.diffuseColor * lightColor * INV_PI;
+    return lambertianColor;
+}
 
-    // cook-torrance specular
-
+half3 CookTorranceSpecular(Light light, SurfaceBRDFParams brdfParams, half3 viewDir)
+{
     float3 halfVec = SafeNormalize(viewDir + light.direction);
     float LdotH = saturate(dot(light.direction, halfVec));
     float NdotH = saturate(dot(brdfParams.normal, halfVec));
@@ -96,6 +96,13 @@ half3 LightingFunc(Light light, SurfaceBRDFParams brdfParams, half3 viewDir)
     }
 
     half3 specularColor = brdfParams.specular * D * FV;
+    return specularColor;
+}
+
+half3 LightingFunc(Light light, SurfaceBRDFParams brdfParams, half3 viewDir)
+{
+    half3 lambertianColor = LambertianDiffuse(light, brdfParams, viewDir);
+    half3 specularColor = CookTorranceSpecular(light, brdfParams, viewDir);
 
     half3 color = lambertianColor + specularColor;
 

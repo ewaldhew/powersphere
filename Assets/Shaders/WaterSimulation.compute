@@ -1,0 +1,54 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+Texture2D<float4> boundaryMask;
+Texture2D<float4> offsets; // top, right, bottom, left. range:[0,step]
+
+Texture2D<float4> gInput;
+RWTexture2D<float4> gOutput;
+
+cbuffer UniformParams
+{
+    //float _DiffusionCoeff;
+    //float _TimeStep;
+    int2 _PlayerPosition;
+    uint2 _TexSize;
+
+    uint _Debug;
+};
+
+inline float2 GetInput(uint x, uint y)
+{
+    return gInput[uint2(x, y)].xy;
+}
+
+[numthreads(8,8,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    if (_Debug == 2) {
+        gOutput[id.xy] = 0;
+        return;
+    }
+
+    bool isWater = boundaryMask[_TexSize.xy - 1 - id.xy].x == 1; // the mask is flipped
+    bool hasPlayer = _PlayerPosition.x > 0 && _PlayerPosition.y > 0;
+
+    const float _DiffusionCoeff = 1;
+    const float _TimeStep = 1;
+
+    // FTCS scheme
+    float2 UV = GetInput(id.x, id.y);
+    float4 dX = 1; //offsets[id.xy];
+    float dx = dX.x + dX.y;
+    float dy = dX.z + dX.w;
+    float dV = 0.25 * _TimeStep * _DiffusionCoeff * (
+        (dX.x*GetInput(id.x + 1, id.y).x - dx*UV.x + dX.y*GetInput(id.x - 1, id.y).x) / (0.5 * dX.x*dX.y * dx)
+      + (dX.z*GetInput(id.x, id.y + 1).x - dx*UV.x + dX.w*GetInput(id.x, id.y - 1).x) / (0.5 * dX.z*dX.w * dy)
+    );
+
+    float vnew = dV * _TimeStep + UV.y;
+    float unew = vnew * _TimeStep + UV.x;
+    UV.y += dV * _TimeStep;
+    UV.x += UV.y * _TimeStep;
+    gOutput[id.xy] = isWater * float4(UV * 0.995 + hasPlayer * smoothstep(0, 1, 1 - distance(id.xy, _PlayerPosition.xy) / 10), 0, 0);
+}

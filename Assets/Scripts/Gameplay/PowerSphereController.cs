@@ -10,6 +10,9 @@ public class PowerSphereController : MonoBehaviour
     Collider selfCollider;
 
     [SerializeField]
+    bool startAsKinematic = false;
+
+    [SerializeField]
     string droppedLayerName = "Default";
 
     private Rigidbody rootBody;
@@ -25,11 +28,26 @@ public class PowerSphereController : MonoBehaviour
         if (droppedLayer == -1) {
             droppedLayer = LayerMask.NameToLayer("Default");
         }
+
+        if (startAsKinematic) {
+            rootBody.isKinematic = true;
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other != playerCollider || !startAsKinematic) {
+            return;
+        }
+
+        // activate on first touch
+        rootBody.isKinematic = false;
+        startAsKinematic = false;
     }
 
     private void OnTriggerStay(Collider other)

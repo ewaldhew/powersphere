@@ -9,6 +9,7 @@ uint _Debug;
 #include "Include/Lighting.hlsl"
 
 #include "Include/Util.hlsl"
+#include "Include/PowerSpheres.hlsl"
 
 TEXTURE2D(_SurfaceMap);
 SAMPLER(sampler_SurfaceMap);
@@ -83,6 +84,8 @@ half4 frag(vertOut IN) : SV_Target
         half2 pm = GetWaterHeight(IN.uv).xx * float2(1, -1) * 0.5;
         return half4(saturate(pm.x), 0, saturate(pm.y), 1);
     }
+
+    clip(IsWithinSphere(IN.pos_WS.xyz, _WaterSpherePositionAndRadius) ? 1 : -1);
 
     float3x3 tangentToWorldMatrix = float3x3(IN.tangent_WS, IN.bitangent_WS, IN.normal_WS);
     float3 normalTS = ComputeNormal(IN.uv);

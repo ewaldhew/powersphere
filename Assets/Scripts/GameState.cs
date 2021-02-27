@@ -26,6 +26,7 @@ public class GameState : MonoBehaviour
     public int colorSphereIndex;
     public int windSphereIndex;
     public int greenSphereIndex;
+    public int waterSphereIndex;
 
     public GameObject[] objects;
     public ObjectState[] objectStates;
@@ -97,6 +98,10 @@ public class GameState : MonoBehaviour
     public PowerSphereState GetGreenSphere()
     {
         return getPowerSphereState(greenSphereIndex);
+    }
+    public PowerSphereState GetWaterSphere()
+    {
+        return getPowerSphereState(waterSphereIndex);
     }
 
     private PowerSphereState getPowerSphereState(int index)

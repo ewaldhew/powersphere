@@ -4,6 +4,7 @@
 float4 _ColorSpherePositionAndRadius;
 float4 _WindSpherePositionAndRadius;
 float4 _GreenSpherePositionAndRadius;
+float4 _WaterSpherePositionAndRadius;
 
 TEXTURE2D(_NoiseTex);
 SAMPLER(sampler_NoiseTex);

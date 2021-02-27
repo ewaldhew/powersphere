@@ -70,6 +70,10 @@ public class GameRenderer : MonoBehaviour
         Vector4 greenSpherePositionAndRadius = Vector4(greenSphere.position, greenSphere.radius);
         Shader.SetGlobalVector("_GreenSpherePositionAndRadius", greenSpherePositionAndRadius);
 
+        var waterSphere = gameState.GetWaterSphere();
+        Vector4 waterSpherePositionAndRadius = Vector4(waterSphere.position, waterSphere.radius);
+        Shader.SetGlobalVector("_WaterSpherePositionAndRadius", waterSpherePositionAndRadius);
+
         var wallGlowRadius = gameState.HeldSpheres.Length > 0 ? gameState.HeldSpheres[0].radius : gameState.passiveBoundaryGlowRadius;
         Shader.SetGlobalFloat("_WallGlowRadius", wallGlowRadius);
 

@@ -100,6 +100,8 @@ half4 frag(vertOut IN) : SV_Target
     float depth = LinearEyeDepth(SampleSceneDepth(screenPos).r, _ZBufferParams);
     float waterDepth = LinearEyeDepth(IN.pos_CS.z, _ZBufferParams);
 
+    float3 dNormal = length(ddx(normalTS) + ddy(normalTS));
+
     half3 color = _BaseColor.rgb;
     half alpha = _BaseColor.a;
     AlphaDiscard(alpha, _Cutoff);
@@ -125,6 +127,7 @@ half4 frag(vertOut IN) : SV_Target
 
     half3 specularColor = CookTorranceSpecular(mainLight, surfData, viewDirectionWS);
 
-    float specularBlendFactor = dot(specularColor, specularColor);
-    return half4(diffuseColor.rgb + specularColor.rgb, lerp(diffuseColor.a, 1, specularBlendFactor));
+    half specularBlendFactor = dot(specularColor, specularColor);
+    half4 outputColor = half4(diffuseColor.rgb + specularColor.rgb, lerp(diffuseColor.a, 1, specularBlendFactor));
+    return lerp(outputColor, 1, half4(dNormal, 0));
 }

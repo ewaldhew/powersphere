@@ -17,15 +17,15 @@ cbuffer UniformParams
     uint _Debug;
 };
 
-inline float2 GetInput(uint x, uint y)
+inline float4 GetInput(uint x, uint y)
 {
-    return gInput[uint2(x, y)].xy;
+    return gInput[uint2(x, y)];
 }
 
 [numthreads(8,8,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
-    if (_Debug == 2) {
+    if (_Debug == -1) {
         gOutput[id.xy] = 0;
         return;
     }
@@ -37,7 +37,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     const float _TimeStep = 1;
 
     // FTCS scheme
-    float2 UV = GetInput(id.x, id.y);
+    float4 UV = GetInput(id.x, id.y);
     float4 dX = 1; //offsets[id.xy];
     float dx = dX.x + dX.y;
     float dy = dX.z + dX.w;
@@ -46,9 +46,10 @@ void CSMain (uint3 id : SV_DispatchThreadID)
       + (dX.z*GetInput(id.x, id.y + 1).x - dx*UV.x + dX.w*GetInput(id.x, id.y - 1).x) / (0.5 * dX.z*dX.w * dy)
     );
 
-    float vnew = dV * _TimeStep + UV.y;
-    float unew = vnew * _TimeStep + UV.x;
-    UV.y += dV * _TimeStep;
+    float ddV = abs(UV.z - dV);
+    UV.y += dV;
+    UV.y *= lerp(0.9, 0.995, 1.0 - saturate(ddV - 0.1)); // damp higher frequencies more
     UV.x += UV.y * _TimeStep;
-    gOutput[id.xy] = isWater * float4(UV * 0.995 + hasPlayer * smoothstep(0, 1, 1 - distance(id.xy, _PlayerPosition.xy) / 10), 0, 0);
+    UV.x *= 0.995;
+    gOutput[id.xy] = isWater * float4(UV.xy + hasPlayer * smoothstep(0, 1, 1 - distance(id.xy, _PlayerPosition.xy) / 10), dV, 0);
 }

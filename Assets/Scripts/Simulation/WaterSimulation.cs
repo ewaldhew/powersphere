@@ -33,8 +33,8 @@ public class WaterSimulation : MonoBehaviour
     private RenderTexture[] buffers = new RenderTexture[2];
     private int swap = 0;
 
-    [SerializeField, Range(0, 2),
-        Tooltip("0: off. 1: visualize waves. 2: reset water.")]
+    [SerializeField, Range(-1, 2),
+        Tooltip("0: off. 1: visualize waves. 2: visualize potential. -1: reset water.")]
     int _Debug = 0;
 
     private void Start()

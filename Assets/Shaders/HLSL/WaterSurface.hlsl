@@ -56,7 +56,7 @@ float3 ComputeNormal(float2 uv)
     float dfdx = (fx1 - fx0) * inveps;
     float dfdy = (fy1 - fy0) * inveps;
 
-    return float3(-dfdx, -dfdy, 1);
+    return normalize(float3(-dfdx, -dfdy, 1));
 }
 
 void vert(appdata IN, out vertOut OUT)
@@ -82,6 +82,10 @@ half4 frag(vertOut IN) : SV_Target
 {
     if (_Debug == 1) {
         half2 pm = GetWaterHeight(IN.uv).xx * float2(1, -1) * 0.5;
+        return half4(saturate(pm.x), 0, saturate(pm.y), 1);
+    }
+    if (_Debug == 2) {
+        half2 pm = SAMPLE_TEXTURE2D_LOD(_SurfaceMap, sampler_SurfaceMap, IN.uv, 0).gg * float2(1, -1) * 0.5;
         return half4(saturate(pm.x), 0, saturate(pm.y), 1);
     }
 

@@ -78,6 +78,7 @@ namespace UnityEngine.Rendering.Universal
         private int watercolorVKernelIndex;
 
         // shader resource slots
+        private int noiseTexSlot;
         private int mainCameraOutputTexSlot;
         private int inputTexSlot;
         private int outputUavSlot;
@@ -104,6 +105,7 @@ namespace UnityEngine.Rendering.Universal
             watercolorHKernelIndex = settings.postProcessShaderH.FindKernel("main");
             watercolorVKernelIndex = settings.postProcessShaderV.FindKernel("main");
 
+            noiseTexSlot = Shader.PropertyToID("NoiseTex");
             mainCameraOutputTexSlot = Shader.PropertyToID("gCameraOutput");
             inputTexSlot = Shader.PropertyToID("gPostInput");
             outputUavSlot = Shader.PropertyToID("gPostOutput");
@@ -162,12 +164,12 @@ namespace UnityEngine.Rendering.Universal
             // Set cbuffer values
             cmd.SetGlobalInt("screenWidth", width);
             cmd.SetGlobalInt("screenHeight", height);
-            cmd.SetGlobalTexture("NoiseTex", noiseTex);
 
             const int DispatchGroupWidth = 64;
 
             // pass 0
             {
+                cmd.SetComputeTextureParam(settings.postProcessShaderH, watercolorHKernelIndex, noiseTexSlot, noiseTex);
                 cmd.SetComputeTextureParam(settings.postProcessShaderH, watercolorHKernelIndex, mainCameraOutputTexSlot, source);
                 cmd.SetComputeTextureParam(settings.postProcessShaderH, watercolorHKernelIndex, inputTexSlot, depthTex);
                 cmd.SetComputeTextureParam(settings.postProcessShaderH, watercolorHKernelIndex, outputUavSlot, gOutput[0]);
@@ -176,6 +178,7 @@ namespace UnityEngine.Rendering.Universal
 
             // pass 1
             {
+                cmd.SetComputeTextureParam(settings.postProcessShaderV, watercolorVKernelIndex, noiseTexSlot, noiseTex);
                 cmd.SetComputeTextureParam(settings.postProcessShaderV, watercolorVKernelIndex, mainCameraOutputTexSlot, source);
                 cmd.SetComputeTextureParam(settings.postProcessShaderV, watercolorVKernelIndex, inputTexSlot, gOutput[0]);
                 cmd.SetComputeTextureParam(settings.postProcessShaderV, watercolorVKernelIndex, outputUavSlot, gOutput[1]);
@@ -209,7 +212,7 @@ namespace UnityEngine.Rendering.Universal
         private RenderTexture createIfInvalid(RenderTexture current, int width, int height, bool enableRandomWrite = false, bool isLinearSpace = true)
         {
             if (current == null || current.width != width || current.height != height) {
-                current?.Release();
+                if (current != null) { current.Release(); }
                 current = new RenderTexture(width, height, 1, RenderTextureFormat.ARGBFloat, isLinearSpace ? RenderTextureReadWrite.Linear : RenderTextureReadWrite.sRGB);
                 current.name = "PostProcessOUTPUT";
                 current.enableRandomWrite = enableRandomWrite;

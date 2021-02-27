@@ -247,7 +247,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gameRenderer: {fileID: 0}
-  particleSystem: {fileID: 228285067208111114}
+  system: {fileID: 228285067208111114}
   windResistance: 0.02
   maxAfloat: 10
   debugViewVelocity: 0

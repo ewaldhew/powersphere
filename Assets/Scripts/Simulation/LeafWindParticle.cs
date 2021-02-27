@@ -8,7 +8,7 @@ public class LeafWindParticle : MonoBehaviour
     [SerializeField]
     GameRenderer gameRenderer;
     [SerializeField]
-    new ParticleSystem particleSystem;
+    ParticleSystem system;
 
     [SerializeField]
     float windResistance = 1f;
@@ -25,18 +25,18 @@ public class LeafWindParticle : MonoBehaviour
 
     void LateUpdate()
     {
-        if (particles.Length < particleSystem.main.maxParticles) {
-            particles = new ParticleSystem.Particle[particleSystem.main.maxParticles];
+        if (particles.Length < system.main.maxParticles) {
+            particles = new ParticleSystem.Particle[system.main.maxParticles];
         }
 
         // reinitialize random data if count changed
         {
-            var customData = particleSystem.customData;
-            customData.enabled = particleSystem.particleCount > numParticles;
+            var customData = system.customData;
+            customData.enabled = system.particleCount > numParticles;
         }
 
-        numParticles = particleSystem.GetParticles(particles);
-        int numVec = particleSystem.GetCustomParticleData(particleRandom, ParticleSystemCustomData.Custom1);
+        numParticles = system.GetParticles(particles);
+        int numVec = system.GetCustomParticleData(particleRandom, ParticleSystemCustomData.Custom1);
         if (numParticles != numVec) {
             Debug.LogError("Count mismatch");
         }
@@ -114,8 +114,8 @@ public class LeafWindParticle : MonoBehaviour
             particleRandom[i] = new Vector4(facingVector.x, facingVector.y, facingVector.z, counter);
         }
 
-        particleSystem.SetParticles(particles, numParticles);
-        particleSystem.SetCustomParticleData(particleRandom, ParticleSystemCustomData.Custom1);
+        system.SetParticles(particles, numParticles);
+        system.SetCustomParticleData(particleRandom, ParticleSystemCustomData.Custom1);
     }
 
     private void OnDrawGizmos()

@@ -248,6 +248,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameRenderer: {fileID: 0}
   system: {fileID: 228285067208111114}
+  getWindDataCS: {fileID: 7200000, guid: 00cf9f54d68841f43a0c6df4ad942725, type: 3}
   windResistance: 0.02
   maxAfloat: 10
   debugViewVelocity: 0

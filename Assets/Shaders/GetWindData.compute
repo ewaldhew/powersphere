@@ -1,0 +1,27 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+#include "HLSL/Include/WindSampler.hlsl"
+
+struct CSInOut
+{
+    float4 positionOrWind;
+    float4 facingVector;
+};
+
+RWStructuredBuffer<CSInOut> _Result;
+
+[numthreads(64,1,1)]
+void CSMain (uint id : SV_DispatchThreadID)
+{
+    CSInOut IN = _Result[id];
+    float3 facingVector = normalize(IN.facingVector.xyz);
+    float3 wind = WindVelocity(IN.positionOrWind.xyz);
+    float windFactor = dot(wind, facingVector);
+
+    CSInOut result = (CSInOut)0;
+    result.positionOrWind = float4(wind, windFactor);
+    result.facingVector = float4(facingVector, 0);
+
+    _Result[id] = result;
+}

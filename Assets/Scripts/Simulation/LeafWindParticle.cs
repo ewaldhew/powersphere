@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿#define USE_COMPUTE_SHADER
+
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,6 +11,8 @@ public class LeafWindParticle : MonoBehaviour
     GameRenderer gameRenderer;
     [SerializeField]
     ParticleSystem system;
+    [SerializeField]
+    ComputeShader getWindDataCS;
 
     [SerializeField]
     float windResistance = 1f;
@@ -23,10 +27,32 @@ public class LeafWindParticle : MonoBehaviour
     private int numParticles;
     private HashSet<int> afloatIndices = new HashSet<int>();
 
+#if USE_COMPUTE_SHADER
+    // for compute shader
+    private struct CSInOut
+    {
+        public Vector4 positionOrWind;
+        public Vector4 facingVector;
+    }
+    private ComputeBuffer csBuffer;
+    private CSInOut[] csInOut;
+
+    private void OnDisable()
+    {
+        csBuffer.Release();
+        csBuffer = null;
+    }
+#endif
+
     void LateUpdate()
     {
         if (particles.Length < system.main.maxParticles) {
             particles = new ParticleSystem.Particle[system.main.maxParticles];
+#if USE_COMPUTE_SHADER
+            if (csBuffer != null) { csBuffer.Release(); }
+            csBuffer = new ComputeBuffer(system.main.maxParticles, 32);
+            csInOut = new CSInOut[system.main.maxParticles];
+#endif
         }
 
         // reinitialize random data if count changed
@@ -41,6 +67,34 @@ public class LeafWindParticle : MonoBehaviour
             Debug.LogError("Count mismatch");
         }
 
+#if USE_COMPUTE_SHADER
+        for (int i = 0; i < numParticles; i++) {
+            csInOut[i] = new CSInOut {
+                facingVector = particleRandom[i],
+                positionOrWind = particles[i].position,
+            };
+        }
+        csBuffer.SetData(csInOut);
+
+        gameRenderer.SetWindValues(); // To make sure our uniforms are ready to use
+        getWindDataCS.SetTexture(0, "_WindTex", gameRenderer.windSampler._WindTex);
+        getWindDataCS.SetFloat("_AnimTime", Time.timeSinceLevelLoad);
+
+        getWindDataCS.SetFloat("_WindFrequency", gameRenderer.windSampler._WindFrequency);
+        getWindDataCS.SetFloat("_WindShiftSpeed", gameRenderer.windSampler._WindShiftSpeed);
+        getWindDataCS.SetFloat("_WindStrength", gameRenderer.windSampler._WindStrength);
+
+        getWindDataCS.SetTexture(0, "_WindBuffer", gameRenderer.windSampler._WindBuffer);
+        getWindDataCS.SetVector("_WindBufferCenter", gameRenderer.windSampler._WindBufferCenter);
+        getWindDataCS.SetFloat("_WindBufferRange", gameRenderer.windSampler._WindBufferRange);
+        getWindDataCS.SetFloat("_DynamicWindStrength", gameRenderer.windSampler._DynamicWindStrength);
+
+        getWindDataCS.SetBuffer(0, "_Result", csBuffer);
+        getWindDataCS.Dispatch(0, MathUtil.DivideByMultiple(numParticles, 64), 1, 1);
+
+        csBuffer.GetData(csInOut);
+#endif
+
         float windSpeed = gameRenderer.windSampler._WindShiftSpeed;
         float windStrength = gameRenderer.windSampler._WindStrength;
         float effectiveWindResistance = windResistance / windSpeed;
@@ -48,11 +102,19 @@ public class LeafWindParticle : MonoBehaviour
         // Update particles according to flow
         for (int i = 0; i < numParticles; i++) {
             Vector3 velocity = particles[i].velocity;
+            float counter = particleRandom[i].w;
+#if USE_COMPUTE_SHADER
+            Vector3 facingVector = csInOut[i].facingVector;
+
+            Vector3 wind = csInOut[i].positionOrWind;
+            float windFactor = csInOut[i].positionOrWind.w;
+#else
             Vector3 facingVector = particleRandom[i];
             facingVector.Normalize();
-            float counter = particleRandom[i].w;
 
             Vector3 wind = gameRenderer.windSampler.WindVelocity(particles[i].position);
+            float windFactor = Vector3.Dot(wind, facingVector);
+#endif
 
             bool isParticleInAir = Mathf.Abs(velocity.y) > Mathf.Epsilon;
             if (!isParticleInAir && velocity.magnitude < 1f) {
@@ -69,7 +131,6 @@ public class LeafWindParticle : MonoBehaviour
                     // give this one a kick based on the wind
                     afloatIndices.Add(i);
 
-                    float windFactor = Vector3.Dot(wind, facingVector);
                     Vector3 targetVelocity = Mathf.Abs(windFactor) * wind;
 
                     velocity = targetVelocity;
@@ -90,7 +151,6 @@ public class LeafWindParticle : MonoBehaviour
             if (!isParticleInAir && distanceFromCenter < windRadius && wind.magnitude > minWind) {
                 const float threshold = 0.8f;
                 if (counter < threshold) {
-                    float windFactor = Vector3.Dot(wind, facingVector);
                     velocity.x += windFactor * wind.magnitude * facingVector.x;
                     velocity.y += wind.magnitude * 5;
                     velocity.z += windFactor * wind.magnitude * facingVector.z;

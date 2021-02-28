@@ -18,6 +18,7 @@ public class GameRenderer : MonoBehaviour
     [SerializeField]
     WindBuffer windBuffer;
     public WindSampler windSampler { get; private set; }
+    private bool hasSetThisFrame = false;
 
     void OnEnable()
     {
@@ -30,6 +31,28 @@ public class GameRenderer : MonoBehaviour
         Shader.SetGlobalTexture("_NoiseTex", noiseTex);
     }
 
+    public void SetWindValues()
+    {
+        if (hasSetThisFrame) { return; }
+
+        windSampler._WindFrequency = gameState.windScale;
+        windSampler._WindShiftSpeed = gameState.windShiftSpeed;
+        windSampler._WindStrength = gameState.windStrength;
+
+        windSampler._WindBuffer = windBuffer.WindPotential;
+        windSampler._WindBufferCenter = windBuffer.CenterPosition;
+        windSampler._WindBufferRange = windBuffer.Range;
+        windSampler._DynamicWindStrength = gameState.dynamicWindStrength;
+        windSampler._DynamicWindRadius = gameState.dynamicWindRadius;
+
+        var windSphere = gameState.GetWindSphere();
+        Vector4 windSpherePositionAndRadius = Vector4(windSphere.position, windSphere.radius);
+        windSampler._WindSpherePositionAndRadius = windSpherePositionAndRadius;
+
+        hasSetThisFrame = true;
+    }
+
+
     void LateUpdate()
     {
         Shader.SetGlobalFloat("_AnimTime", Time.timeSinceLevelLoad);
@@ -37,19 +60,13 @@ public class GameRenderer : MonoBehaviour
         Shader.SetGlobalFloat("_WindFrequency", gameState.windScale);
         Shader.SetGlobalFloat("_WindShiftSpeed", gameState.windShiftSpeed);
         Shader.SetGlobalFloat("_WindStrength", gameState.windStrength);
-        windSampler._WindFrequency = gameState.windScale;
-        windSampler._WindShiftSpeed = gameState.windShiftSpeed;
-        windSampler._WindStrength = gameState.windStrength;
 
         Shader.SetGlobalTexture("_WindBuffer", windBuffer.WindPotential);
         Shader.SetGlobalVector("_WindBufferCenter", windBuffer.CenterPosition);
         Shader.SetGlobalFloat("_WindBufferRange", windBuffer.Range);
         Shader.SetGlobalFloat("_DynamicWindStrength", gameState.dynamicWindStrength);
-        windSampler._WindBuffer = windBuffer.WindPotential;
-        windSampler._WindBufferCenter = windBuffer.CenterPosition;
-        windSampler._WindBufferRange = windBuffer.Range;
-        windSampler._DynamicWindStrength = gameState.dynamicWindStrength;
-        windSampler._DynamicWindRadius = gameState.dynamicWindRadius;
+
+        SetWindValues();
 
         Vector3 playerPosition = gameState.player.transform.position;
         Shader.SetGlobalVector("_PlayerPosition", playerPosition);
@@ -64,7 +81,6 @@ public class GameRenderer : MonoBehaviour
         var windSphere = gameState.GetWindSphere();
         Vector4 windSpherePositionAndRadius = Vector4(windSphere.position, windSphere.radius);
         Shader.SetGlobalVector("_WindSpherePositionAndRadius", windSpherePositionAndRadius);
-        windSampler._WindSpherePositionAndRadius = windSpherePositionAndRadius;
 
         var greenSphere = gameState.GetGreenSphere();
         Vector4 greenSpherePositionAndRadius = Vector4(greenSphere.position, greenSphere.radius);
@@ -78,5 +94,7 @@ public class GameRenderer : MonoBehaviour
         Shader.SetGlobalFloat("_WallGlowRadius", wallGlowRadius);
 
         postProcessRendererFeature.settings.postProcessing = postProcessingEnabled;
+
+        hasSetThisFrame = false;
     }
 }
